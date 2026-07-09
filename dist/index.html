@@ -33,17 +33,17 @@
       </button>
     </div>
   </div>
-  <div class="mobile-nav" id="mobileNav">
-    <div class="panel">
-      <button class="close" onclick="document.getElementById('mobileNav').classList.remove('open')" aria-label="Sluiten">&times;</button>
-      <a href="hoe-het-werkt/index.html">Hoe het werkt</a>
+</header>
+<div class="mobile-nav" id="mobileNav">
+  <div class="panel">
+    <button class="close" onclick="document.getElementById('mobileNav').classList.remove('open')" aria-label="Sluiten">&times;</button>
+    <a href="hoe-het-werkt/index.html">Hoe het werkt</a>
 <a href="cadeau-inspiratie/index.html">Cadeau-inspiratie</a>
 <a href="over-ons/index.html">Over ons</a>
 <a href="faq/index.html">FAQ</a>
-      <a href="wizard/index.html" class="btn btn-primary btn-block">Start ParfumPicker</a>
-    </div>
+    <a href="wizard/index.html" class="btn btn-primary btn-block">Start ParfumPicker</a>
   </div>
-</header>
+</div>
 
 <section class="hero">
   <div class="container inner">
@@ -97,8 +97,8 @@
       <a href="wizard/index.html" class="btn btn-primary">Start nu <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
     </div>
     <div>
-      <div class="wizard-step-label">Stap 1 van 5</div>
-      <div class="progress-track"><div class="progress-fill" style="width:20%"></div></div>
+      <div class="wizard-step-label">Stap 1 van 7</div>
+      <div class="progress-track"><div class="progress-fill" style="width:14%"></div></div>
       <strong style="display:block;margin-bottom:12px;font-size:16px">Voor wie zoek je een parfum?</strong>
       <div class="option-grid">
         <div class="option-card selected"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.4-3.8 4.2-5.6 7.5-5.6s6.1 1.8 7.5 5.6" stroke-linecap="round"/></svg><div>Voor een man</div></div>
@@ -126,7 +126,8 @@
       <h2>Top 10 populaire geuren</h2>
       <p class="sub">Populair bij velen, geliefd om een reden &mdash; wekelijks bijgewerkt.</p>
     </div>
-    <div class="perfume-scroll"><article class="perfume-card">
+    <div class="perfume-scroll-wrap">
+      <div class="perfume-scroll" id="top10Scroll"><article class="perfume-card">
   <div class="rank">1</div>
   <div class="bottle"><svg viewBox="0 0 140 180" width="140" height="180" xmlns="http://www.w3.org/2000/svg">
   <rect x="44" y="18" width="24" height="16" rx="3" fill="#ccc"/>
@@ -276,6 +277,8 @@
   <p>Een frisse, groen-watergedreven zomergeur.</p>
   <a class="details-link" href="parfums/rl-polo-blue/index.html">Bekijk details <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
 </article></div>
+      <button type="button" class="scroll-next" aria-label="Meer geuren tonen" onclick="document.getElementById('top10Scroll').scrollBy({left:260,behavior:'smooth'})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+    </div>
   </div>
 </section>
 

@@ -109,14 +109,14 @@ def header_html(base, active=""):
       </button>
     </div>
   </div>
-  <div class="mobile-nav" id="mobileNav">
-    <div class="panel">
-      <button class="close" onclick="document.getElementById('mobileNav').classList.remove('open')" aria-label="Sluiten">&times;</button>
-      {mobile_links}
-      <a href="{rel("/wizard/", base)}" class="btn btn-primary btn-block">Start ParfumPicker</a>
-    </div>
+</header>
+<div class="mobile-nav" id="mobileNav">
+  <div class="panel">
+    <button class="close" onclick="document.getElementById('mobileNav').classList.remove('open')" aria-label="Sluiten">&times;</button>
+    {mobile_links}
+    <a href="{rel("/wizard/", base)}" class="btn btn-primary btn-block">Start ParfumPicker</a>
   </div>
-</header>'''
+</div>'''
 
 FOOTER_TRUST = [
     ("shield", "Eerlijk & onafhankelijk", "We sturen op match, niet op populariteit of prijs."),
@@ -262,8 +262,8 @@ def wizard_preview_panel_html(base):
       <a href="{rel("/wizard/", base)}" class="btn btn-primary">Start nu {icon('arrow')}</a>
     </div>
     <div>
-      <div class="wizard-step-label">Stap 1 van 5</div>
-      <div class="progress-track"><div class="progress-fill" style="width:20%"></div></div>
+      <div class="wizard-step-label">Stap 1 van 7</div>
+      <div class="progress-track"><div class="progress-fill" style="width:14%"></div></div>
       <strong style="display:block;margin-bottom:12px;font-size:16px">Voor wie zoek je een parfum?</strong>
       <div class="option-grid">
         <div class="option-card selected">{icon('user')}<div>Voor een man</div></div>
@@ -321,7 +321,10 @@ def build_homepage():
       <h2>Top 10 populaire geuren</h2>
       <p class="sub">Populair bij velen, geliefd om een reden &mdash; wekelijks bijgewerkt.</p>
     </div>
-    <div class="perfume-scroll">{cards}</div>
+    <div class="perfume-scroll-wrap">
+      <div class="perfume-scroll" id="top10Scroll">{cards}</div>
+      <button type="button" class="scroll-next" aria-label="Meer geuren tonen" onclick="document.getElementById('top10Scroll').scrollBy({{left:260,behavior:'smooth'}})">{icon('arrow')}</button>
+    </div>
   </div>
 </section>
 
@@ -464,7 +467,7 @@ def build_hoe_het_werkt():
 </section>
 {steps_html()}
 <section class="section container prose">
-  <h2>Waarom vragen we dit niet gewoon: "welke geur vind jij lekker?"</h2>
+  <h2>Waarom vragen we dit niet gewoon: &ldquo;welke geur vind jij lekker?&rdquo;</h2>
   <p>Omdat je waarschijnlijk niet voor jezelf shopt. De meeste bezoekers van ParfumPicker zoeken een cadeau voor iemand anders &mdash; een partner, ouder, vriend(in) of collega &mdash; en kennen diens neus niet uit het hoofd. Daarom vragen we vooral naar dingen die jij wél weet: de gelegenheid, het budget, en hoe je die persoon zou omschrijven.</p>
   <h2>Hoe bepalen we de match?</h2>
   <p>Onze tool doorzoekt onze database met parfums en geeft elke geur een score op basis van jouw antwoorden: past de gelegenheid, komt de persoonlijkheid overeen, valt het binnen budget. Geen zwarte doos &mdash; bij elk resultaat leggen we uit waarom het past.</p>
@@ -496,11 +499,11 @@ def build_over_ons():
     write_page(path, html_out)
 
 FAQS = [
-    ("Is ParfumPicker echt helemaal gratis?", "Ja. Je betaalt niets, wij verdienen (op termijn) via advertenties en eventuele partnerlinks naar winkels &mdash; nooit via een account of abonnement."),
+    ("Is ParfumPicker echt helemaal gratis?", "Ja. Je betaalt niets, wij verdienen (op termijn) via advertenties en eventuele partnerlinks naar winkels — nooit via een account of abonnement."),
     ("Moet ik me registreren of een e-mailadres achterlaten?", "Nee. Je kunt de wizard direct gebruiken zonder account, zonder e-mailadres."),
     ("Hoe weten jullie of een parfum echt goed past?", "We combineren data over notenpiramide, geurfamilie en stemmingen met jouw antwoorden over gelegenheid, budget en persoonlijkheid. Bij elk resultaat leggen we uit waarom het past."),
     ("Verkopen jullie zelf parfum?", "Nee, ParfumPicker is geen webshop. We geven onafhankelijk advies; waar je het uiteindelijk koopt is aan jou."),
-    ("Waarom zie ik soms een parfum die ik niet ken?", "Omdat we bewust niet alleen bestsellers tonen. Een minder bekende geur kan alsnog de beste match zijn &mdash; dat is precies waar we op sturen."),
+    ("Waarom zie ik soms een parfum die ik niet ken?", "Omdat we bewust niet alleen bestsellers tonen. Een minder bekende geur kan alsnog de beste match zijn — dat is precies waar we op sturen."),
     ("Hebben jullie ook parfum voor dames?", "Onze database wordt uitgebreid; op dit moment is het aanbod het meest volledig voor herenparfums."),
 ]
 
@@ -508,7 +511,7 @@ def build_faq():
     path = "/faq/"
     items = "".join(f'<details class="faq-item"><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in FAQS)
     content = f'''
-<section class="page-hero container"><h1>Veelgestelde vragen</h1></section>
+<section class="page-hero container"><h1>Veelgestelde vragen</h1><p class="lead">Antwoorden op de vragen die we het vaakst krijgen over ParfumPicker.</p></section>
 <section class="container prose" style="max-width:760px">{items}</section>
 '''
     html_out = base_page("Veelgestelde vragen | ParfumPicker.nl", "Antwoorden op veelgestelde vragen over ParfumPicker: gratis, geen account, onafhankelijk parfumadvies.", content, path, active_nav="/faq/")

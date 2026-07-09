@@ -107,7 +107,7 @@ p{margin:0 0 1em}
 .option-card.multi{position:relative}
 .option-card.multi.selected::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--accent);font-weight:800}
 .wizard-side{background:var(--accent-light);border-radius:14px;padding:18px;font-size:14px;color:var(--accent-dark)}
-.wizard-nav{display:flex;justify-content:space-between;margin-top:22px;gap:12px}
+.wizard-nav{display:flex;flex-wrap:wrap;justify-content:space-between;margin-top:22px;gap:12px}
 
 /* Steps */
 .steps{padding:52px 0;text-align:center}
@@ -127,6 +127,9 @@ p{margin:0 0 1em}
 .section-head .sub{color:var(--text-muted)}
 
 /* Perfume cards / carousel */
+.perfume-scroll-wrap{position:relative}
+.perfume-scroll-wrap::after{content:"";position:absolute;top:0;right:0;bottom:18px;width:56px;background:linear-gradient(to right, rgba(253,252,251,0), var(--bg) 70%);pointer-events:none}
+.scroll-next{position:absolute;top:calc(50% - 9px);right:6px;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow-lg);display:flex;align-items:center;justify-content:center;color:var(--accent);cursor:pointer;z-index:2;padding:0}
 .perfume-scroll{display:flex;gap:18px;overflow-x:auto;padding:6px 2px 18px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .perfume-scroll::-webkit-scrollbar{height:6px}
 .perfume-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
@@ -140,7 +143,7 @@ p{margin:0 0 1em}
 .perfume-card .meta{font-size:12.5px;color:var(--text-muted);margin-bottom:6px}
 .perfume-card p{font-size:13px;color:var(--text-muted);margin-bottom:10px;min-height:34px}
 .perfume-card .details-link{font-size:13.5px;font-weight:700;color:var(--accent);display:inline-flex;gap:6px;align-items:center}
-.perfume-grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.perfume-grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 
 /* Results */
 .results-summary{background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:26px}
@@ -171,7 +174,7 @@ p{margin:0 0 1em}
 .prose{max-width:70ch}
 .prose h2{margin-top:1.6em}
 .faq-item{border-bottom:1px solid var(--border);padding:18px 0}
-.faq-item summary{cursor:pointer;font-weight:700;font-size:16px}
+.faq-item summary{cursor:pointer;font-weight:700;font-size:16px;padding:12px 0;display:flex;align-items:center}
 .faq-item p{margin-top:10px;color:var(--text-muted)}
 
 /* Perfume detail page */

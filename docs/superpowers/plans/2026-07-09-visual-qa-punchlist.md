@@ -20,17 +20,24 @@ its source HTML.
 ## Desktop
 
 ### 1. Homepage (`/`)
-- [ ] Homepage embedded wizard-preview widget shows "Stap 1 van 5" (matching the
+- [x] Homepage embedded wizard-preview widget shows "Stap 1 van 5" (matching the
       "Zo werkt het" 5-step section below it), but the real wizard at `/wizard/`
       has 7 steps ("Stap 1 van 7": geslacht, gelegenheid, bekend, persoonlijkheid,
       moment, budget, seizoen). The homepage teaser undersells/misstates the
       actual flow length — worth reconciling copy vs. the real step count.
-- [ ] "Top 10 populaire geuren" row (`.perfume-scroll`) is horizontally
+      **Fixed:** `wizard_preview_panel_html()` in `build.py` now reads "Stap 1
+      van 7" with progress-fill at 14% (1/7), matching the real wizard.
+- [x] "Top 10 populaire geuren" row (`.perfume-scroll`) is horizontally
       scrollable (`scrollWidth` 2466px vs `clientWidth` 1140px, i.e. only ~4-5
       of 10 cards are visible) but has no visible next/prev affordance — no
       arrow button, no fade edge. The approved mockup shows an explicit
       circular ">" button hinting scrollability; the live page relies on the
       browser's default (often near-invisible) scrollbar only.
+      **Fixed:** added a `.perfume-scroll-wrap` wrapper with a right-edge fade
+      (`::after` gradient) and a circular `.scroll-next` button (44px, reuses
+      the existing arrow icon) that calls `scrollBy({left:260,behavior:'smooth'})`
+      on the scroll container. CSS in `dist/assets/css/style.css`, markup in
+      `build.py`'s homepage top-10 section.
 - [x] Header, hero, feature icons, "Start ParfumPicker tool" widget, "Zo werkt
       het" steps: colors/spacing match tokens, no overflow
       (`bodyScrollWidth` 1265 vs `innerWidth` 1280), icon sizes consistent
@@ -60,21 +67,30 @@ its source HTML.
   related-product cards, and CTA band all present and on-token. No overflow.
 
 ### 5. Hoe het werkt (`/hoe-het-werkt/`)
-- [ ] Minor: the FAQ-style heading "Waarom vragen we dit niet gewoon: "welke
+- [x] Minor: the FAQ-style heading "Waarom vragen we dit niet gewoon: "welke
       geur vind jij lekker?"" uses straight double quotes (`"…"`) rather than
       typographic/curly quotes, which reads as less polished next to the
       site's otherwise careful use of accented characters (e.g. "hém of háár"
       on the homepage). Cosmetic only.
+      **Fixed:** heading in `build.py`'s `build_hoe_het_werkt()` now uses
+      `&ldquo;…&rdquo;` curly quotes.
 - Otherwise none found: steps list, two-column Q&A content, CTA band, no
   overflow.
 
 ### 6. Cadeau-inspiratie (`/cadeau-inspiratie/`)
-- [ ] The article list reuses the `.perfume-grid` class (`grid-template-columns:
+- [x] The article list reuses the `.perfume-grid` class (`grid-template-columns:
       270px 270px 270px 270px`, a 4-column grid meant for the Top-10/related
       product cards) but only has 2 article link-cards. On desktop this
       leaves roughly half the row (2 of 4 columns, ~620px of the 1180px
       container) as dead empty space to the right of the two cards instead of
       wrapping/centering them or using a layout suited to a 2-item list.
+      **Fixed:** changed `.perfume-grid` in `dist/assets/css/style.css` from
+      `repeat(auto-fill,minmax(230px,1fr))` to `repeat(auto-fit,minmax(230px,1fr))`
+      so empty implicit tracks collapse and existing cards stretch to fill the
+      row (verified: 2 cards now render at 561px each, 0px dead space).
+      This is a shared class also used by the "Lijkt op" related-products
+      section on parfum detail pages, which continues to render correctly
+      with more cards.
 - Otherwise none found: header/footer consistent, no overflow.
 
 ### 7. Over ons (`/over-ons/`)
@@ -84,18 +100,30 @@ its source HTML.
   overflow.
 
 ### 8. FAQ (`/faq/`)
-- [ ] The page-hero section contains only the `<h1>Veelgestelde vragen</h1>`
+- [x] The page-hero section contains only the `<h1>Veelgestelde vragen</h1>`
       with no intro/subtitle paragraph underneath it. Every other content
       page checked (`hoe-het-werkt`, `cadeau-inspiratie`, `over-ons`) has a
       one-line subtitle under its `<h1>` in the same `.page-hero` block —
       FAQ is the outlier and reads as visually abrupt by comparison.
-- [ ] Bug: two FAQ answers render the literal text `&mdash;` instead of an
+      **Fixed:** added `<p class="lead">Antwoorden op de vragen die we het
+      vaakst krijgen over ParfumPicker.</p>` under the `<h1>` in
+      `build_faq()` in `build.py`.
+- [x] Bug: two FAQ answers render the literal text `&mdash;` instead of an
       em dash. Confirmed via rendered `textContent` (not just source), e.g.
       "...wij verdienen (op termijn) via advertenties en eventuele
       partnerlinks naar winkels &mdash; nooit via een account of
       abonnement." Root cause is a double-escaped entity (`&amp;mdash;`) in
       `dist/faq/index.html` — grep confirms exactly 2 occurrences, both in
       that file only, nowhere else in `dist/`.
+      **Fixed at the source:** `FAQS` in `build.py` had the literal text
+      `&mdash;` in two answer strings, which then got passed through
+      `esc()` (i.e. `html.escape`) in `build_faq()`, turning `&` into
+      `&amp;` and producing `&amp;mdash;`. Replaced the entity text with an
+      actual em-dash character (`—`) in both `FAQS` strings, which `esc()`
+      leaves untouched. Verified via rendered `textContent` on both
+      affected FAQ items (2 real em dashes render, no `&mdash;`/`&amp;mdash;`
+      anywhere in `dist/`) and confirmed the fix survives a `python build.py`
+      rerun (it's a source-string fix, not a patched HTML file).
 - Accordion (`<details>`/`<summary>`) itself works correctly (expand/collapse
   verified by click), border/spacing on-token. No overflow.
 
@@ -112,7 +140,7 @@ logged under Desktop (wizard step-count mismatch, Top-10 scroll affordance,
 curly quotes, cadeau-inspiratie grid, FAQ subtitle/`&mdash;` bug) were not
 re-verified here except where mobile changes the picture (noted inline).
 
-- [ ] **Mobile nav drawer only paints/hit-tests the top ~68px band — most of
+- [x] **Mobile nav drawer only paints/hit-tests the top ~68px band — most of
       its links are visually and functionally unreachable by tap.** Reproduced
       on two different pages (homepage `/` and `/faq/`). Opening the drawer
       (`#mobileNav.open`) sets `.mobile-nav`/`.panel` to `position:fixed`/
@@ -136,7 +164,20 @@ re-verified here except where mobile changes the picture (noted inline).
       itself, most likely `.mobile-nav`/`.panel` needs an explicit
       `height:100dvh` (or `100vh`) instead of the auto/inherited height it's
       currently resolving to.
-- [ ] **Wizard step 7 ("In welk seizoen...") footer button row overflows the
+      **Root cause confirmed and fixed:** `.mobile-nav` was nested inside
+      `<header class="site-header">` in the generated markup. `.site-header`
+      has `backdrop-filter:blur(8px)`, which establishes a containing block
+      for its fixed-position descendants — so `.mobile-nav`'s `inset:0`
+      resolved against the ~69px header box instead of the viewport.
+      Restructured `header_html()` in `build.py` so the `.mobile-nav` div is
+      now a sibling of `<header>` (both direct children of `<body>`) instead
+      of nested inside it — no containing-block trap. Verified live at
+      375×812 on both `/` and `/faq/`: drawer height is now 812px (full
+      viewport), `.mobile-nav`'s parent is `BODY`, and every link
+      (Hoe het werkt, Cadeau-inspiratie, Over ons, FAQ, Start ParfumPicker)
+      is correctly hit-testable via `elementFromPoint`. No horizontal
+      overflow introduced (`body.scrollWidth` still 375 while open).
+- [x] **Wizard step 7 ("In welk seizoen...") footer button row overflows the
       viewport and expands the whole page's layout width, producing real
       horizontal scroll site-wide on that step only.** Verified live: on step
       7, `document.body.scrollWidth`, `document.documentElement.scrollWidth`,
@@ -156,13 +197,24 @@ re-verified here except where mobile changes the picture (noted inline).
       (`/wizard/?resultaat=1`) confirmed no overflow, and `innerWidth` reverts
       to 375 immediately after advancing past step 7 to the results page — the
       bug is isolated to step 7's button row.
-- [ ] Minor: FAQ accordion `<summary>` tap targets are inconsistent in height
+      **Fixed:** added `flex-wrap:wrap` to `.wizard-nav` in
+      `dist/assets/css/style.css`. Verified live at 375px width by scripting
+      through the wizard to step 7: `window.innerWidth`, `document.body.scrollWidth`,
+      and `document.documentElement.scrollWidth` all stayed at 375 (previously
+      forced to 427). "Vorige" now sits on its own row; "Sla over" and "Bekijk
+      mijn advies" wrap to a second row and fit fully within 0-375px.
+- [x] Minor: FAQ accordion `<summary>` tap targets are inconsistent in height
       — the first FAQ item's clickable row is only 24px tall (`padding: 0`,
       `line-height: 24px`, full 335px width) while the next two are 48px tall
       (two-line question text). 24px sits right at the WCAG 2.5.8 (AA) 24×24px
       minimum but well under the more comfortable 44px touch-target guideline,
       and the inconsistency between items (24px vs 48px) makes the row heights
       look uneven when scanning the accordion on a phone.
+      **Fixed:** added `padding:12px 0` (plus `display:flex;align-items:center`)
+      to `.faq-item summary` in `dist/assets/css/style.css`. All FAQ rows are
+      now at least 48px tall (verified: 48/72/72/48/72/48px across the 6
+      items on `/faq/`), comfortably above the 44px touch-target guideline,
+      and the accordion still expands/collapses correctly on click.
 - Confirmed clean (no horizontal overflow anywhere — `body`/`documentElement`
   `scrollWidth` equals `window.innerWidth` at 375 on every check — and header
   present/non-overflowing on every template checked): homepage (`/`, including
