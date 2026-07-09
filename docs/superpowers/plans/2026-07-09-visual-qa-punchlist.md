@@ -98,3 +98,85 @@ its source HTML.
       that file only, nowhere else in `dist/`.
 - Accordion (`<details>`/`<summary>`) itself works correctly (expand/collapse
   verified by click), border/spacing on-token. No overflow.
+
+## Mobile
+
+Audited at mobile viewport (375x812). Same method note as Desktop applies:
+`preview_screenshot` timed out again in this session (retried once), so this
+pass also used `preview_eval`/`preview_snapshot`/`preview_inspect` — DOM and
+computed-style inspection, `elementFromPoint` hit-testing, accessibility-tree
+snapshots, and `document.body.scrollWidth`/`document.documentElement.scrollWidth`
+vs `window.innerWidth` overflow checks — on every page, navigated to live on
+`http://localhost:4173`. Findings below are new to mobile; issues already
+logged under Desktop (wizard step-count mismatch, Top-10 scroll affordance,
+curly quotes, cadeau-inspiratie grid, FAQ subtitle/`&mdash;` bug) were not
+re-verified here except where mobile changes the picture (noted inline).
+
+- [ ] **Mobile nav drawer only paints/hit-tests the top ~68px band — most of
+      its links are visually and functionally unreachable by tap.** Reproduced
+      on two different pages (homepage `/` and `/faq/`). Opening the drawer
+      (`#mobileNav.open`) sets `.mobile-nav`/`.panel` to `position:fixed`/
+      `position:static` with `overflow:visible`, but both elements' own
+      computed `height` collapses to `67.6px` (matching the header height)
+      instead of the full viewport. The `<a>` links inside (`getBoundingClientRect`
+      shows them correctly laid out at e.g. top 72px, 115px, 159px, 202px,
+      246px) are geometrically positioned below that 68px line, but
+      `document.elementFromPoint()` at those coordinates returns the
+      underlying page content (e.g. the homepage `<section class="hero">` /
+      `<h1>`, or the FAQ `<h1>`) instead of the nav panel — confirming the
+      links are not actually paintable/tappable there, only the close button
+      (`×`, which sits inside the 68px band) and the top 1–2 links are usable.
+      In effect the mobile menu is broken for reaching "Cadeau-inspiratie",
+      "Over ons", "FAQ", and "Start ParfumPicker" via a real touch tap, even
+      though a `.click()` called directly on the `<a>` element (bypassing
+      hit-testing) still works and the drawer's own open/close toggle (via the
+      hamburger and `×` buttons) functions correctly. No horizontal overflow
+      is introduced by this (`body.scrollWidth` stays 375 while the drawer is
+      open) — this is purely a vertical/hit-test clipping bug on the drawer
+      itself, most likely `.mobile-nav`/`.panel` needs an explicit
+      `height:100dvh` (or `100vh`) instead of the auto/inherited height it's
+      currently resolving to.
+- [ ] **Wizard step 7 ("In welk seizoen...") footer button row overflows the
+      viewport and expands the whole page's layout width, producing real
+      horizontal scroll site-wide on that step only.** Verified live: on step
+      7, `document.body.scrollWidth`, `document.documentElement.scrollWidth`,
+      and even `window.innerWidth` all read `427` instead of `375` (the
+      overflowing content forces the mobile layout viewport itself to widen,
+      not just the body). Root cause: `.wizard-nav` is `display:flex;
+      justify-content:space-between` with two children — "Vorige" (94px) and
+      an unlabeled right-hand `flex-wrap:nowrap` group containing "Sla over"
+      (106px) + "Bekijk mijn advies" (178px) with a 10px gap (294px total,
+      positioned `left:133px` to `right:427px`, i.e. 52px past the 375px
+      viewport edge). The equivalent 3-button rows on the other two optional
+      steps (step 3: "Vorige"/"Sla over"/"Volgende"; step 5: same) do **not**
+      overflow (`scrollWidth` stays 375) — step 7 is unique because "Bekijk
+      mijn advies" is much longer than "Volgende" and is the only step where
+      that longer label combines with the "Sla over" skip button in the same
+      nowrap row. All other wizard steps (1, 2, 4, 6) and the results page
+      (`/wizard/?resultaat=1`) confirmed no overflow, and `innerWidth` reverts
+      to 375 immediately after advancing past step 7 to the results page — the
+      bug is isolated to step 7's button row.
+- [ ] Minor: FAQ accordion `<summary>` tap targets are inconsistent in height
+      — the first FAQ item's clickable row is only 24px tall (`padding: 0`,
+      `line-height: 24px`, full 335px width) while the next two are 48px tall
+      (two-line question text). 24px sits right at the WCAG 2.5.8 (AA) 24×24px
+      minimum but well under the more comfortable 44px touch-target guideline,
+      and the inconsistency between items (24px vs 48px) makes the row heights
+      look uneven when scanning the accordion on a phone.
+- Confirmed clean (no horizontal overflow anywhere — `body`/`documentElement`
+  `scrollWidth` equals `window.innerWidth` at 375 on every check — and header
+  present/non-overflowing on every template checked): homepage (`/`, including
+  hero, feature-icon rows, embedded wizard-preview teaser, "Zo werkt het"
+  steps, Top-10 row — scroll-only overflow inside `.perfume-scroll` as
+  expected, same pattern as the Desktop finding, not re-logged here), wizard
+  step 1 (`/wizard/`, `option-card` tap targets 156×100px), wizard step 2
+  (gelegenheid), step 3 (merk, skippable), step 4 (persoonlijkheid tags,
+  `option-card.multi` 156×60px, 12 tags), step 5 (moment), step 6 (budget),
+  results view (`/wizard/?resultaat=1`, result cards, "Onze aanrader" badge,
+  ad-slot placeholder, "Bekijk details →" links), parfum detail template
+  (`/parfums/dior-sauvage-edt/`, tag chips, spec grid), `/hoe-het-werkt/`,
+  `/cadeau-inspiratie/` (`.perfume-grid` correctly collapses to a single
+  335px column on mobile — the Desktop 4-column dead-space issue does not
+  reproduce here), `/over-ons/`, and `/faq/` (baseline layout/header; see
+  drawer and accordion-tap-target findings above for this page's actual
+  issues).
