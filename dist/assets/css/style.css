@@ -58,6 +58,9 @@ p{margin:0 0 1em}
   .nav-links{display:flex}
   .hamburger{display:none}
 }
+@media(max-width:520px){
+  .header-actions .btn-primary{display:none}
+}
 
 /* Mobile nav drawer */
 .mobile-nav{position:fixed;inset:0;background:rgba(20,20,20,.4);z-index:100;display:none}
