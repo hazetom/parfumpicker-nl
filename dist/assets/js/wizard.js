@@ -310,4 +310,24 @@
 
   var STEP_RENDERERS = {
     geslacht: renderStepGeslacht,
-    gelege
+    gelegenheid: renderStepGelegenheid,
+    bekend: renderStepBekend,
+    persoonlijkheid: renderStepPersoonlijkheid,
+    moment: renderStepMoment,
+    budget: renderStepBudget,
+    seizoen: renderStepSeizoen
+  };
+
+  function render(){
+    var key = STEPS[state.step];
+    var fn = STEP_RENDERERS[key];
+    if (fn) fn();
+  }
+
+  fetchData().then(function(){
+    render();
+  }).catch(function(err){
+    root.innerHTML = '<div class="wizard-panel" style="max-width:640px;margin:32px auto;text-align:center">' +
+      '<p style="color:var(--text-muted)">' + err.message + '</p></div>';
+  });
+})();
