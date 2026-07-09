@@ -39,6 +39,7 @@ p{margin:0 0 1em}
 .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
 .btn-block{width:100%;justify-content:center}
 .btn[disabled]{opacity:.4;cursor:not-allowed}
+.icon{flex:none;width:20px;height:20px}
 
 /* Header */
 .site-header{
