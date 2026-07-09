@@ -1,0 +1,15 @@
+{
+  "_comment": "Handmatig te onderhouden lijst (wekelijks mini-onderzoek, zoals afgesproken). Volgorde = ranking. IDs verwijzen naar data/parfums.jsonl.",
+  "ids": [
+    "dior-sauvage-edt",
+    "chanel-bleu-edt",
+    "paco-1million",
+    "armani-adg-profumo",
+    "ysl-y-edp",
+    "boss-bottled",
+    "versace-eros-edt",
+    "joop-homme",
+    "jpg-le-male",
+    "rl-polo-blue"
+  ]
+}
