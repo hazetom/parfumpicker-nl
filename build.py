@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-10-4"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-10-5"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -288,7 +288,7 @@ def trust_row_html():
 def steps_html():
     return '''<section class="steps container" id="hoe-werkt-het">
   <h2>Zo werkt het</h2>
-  <p class="steps-prose">Je beantwoordt een paar simpele vragen: voor wie je een parfum zoekt, wat de gelegenheid is en hoe je die persoon zou omschrijven. Ken je al een merk dat diegene mooi vindt? Dan vullen we dat aan met details over moment en budget. Binnen een minuut zetten we al je antwoorden om in persoonlijk parfumadvies, m&eacute;t een duidelijke uitleg waarom elke geur past.</p>
+  <p class="steps-prose">Je beantwoordt een paar simpele vragen: voor wie je een parfum zoekt en hoe je die persoon zou omschrijven. Ken je al een merk dat diegene mooi vindt? Dan vullen we dat aan met details over hoe opvallend de geur mag zijn, wanneer hij gedragen wordt en je budget. Binnen een minuut zetten we al je antwoorden om in persoonlijk parfumadvies, m&eacute;t een duidelijke uitleg waarom elke geur past.</p>
 </section>'''
 
 def perfume_card_html(p, base, rank=None, badge=None):
@@ -325,7 +325,7 @@ def wizard_embed_html(base):
     cfg_json = json.dumps({"parfumBase": base + "parfums/"})
     return f'''<section class="wizard-embed" id="wizard">
   <div class="container container-wide">
-    <div class="wizard-kicker reveal">{icon('compass')} 7 korte vragen &middot; 1 minuut &middot; gratis</div>
+    <div class="wizard-kicker reveal">{icon('compass')} 6 korte vragen &middot; 1 minuut &middot; gratis</div>
     {wizard_shell_html('<div id="wizardApp"></div>')}
   </div>
 </section>
@@ -517,9 +517,9 @@ def build_hoe_het_werkt():
 {steps_html()}
 <section class="section container prose">
   <h2>Waarom vragen we dit niet gewoon: &ldquo;welke geur vind jij lekker?&rdquo;</h2>
-  <p>Omdat je waarschijnlijk niet voor jezelf shopt. De meeste bezoekers van ParfumPicker zoeken een cadeau voor iemand anders, een partner, ouder, vriend(in) of collega, en kennen diens neus niet uit het hoofd. Daarom vragen we vooral naar dingen die jij wél weet: de gelegenheid, het budget, en hoe je die persoon zou omschrijven.</p>
+  <p>Omdat je waarschijnlijk niet voor jezelf shopt. De meeste bezoekers van ParfumPicker zoeken een cadeau voor iemand anders, een partner, ouder, vriend(in) of collega, en kennen diens neus niet uit het hoofd. Daarom vragen we vooral naar dingen die jij wél weet: hoe je die persoon zou omschrijven, hoe opvallend de geur mag zijn, en je budget.</p>
   <h2>Hoe bepalen we de match?</h2>
-  <p>Onze tool doorzoekt onze database met parfums en geeft elke geur een score op basis van jouw antwoorden: past de gelegenheid, komt de persoonlijkheid overeen, valt het binnen budget. Geen zwarte doos, bij elk resultaat leggen we uit waarom het past.</p>
+  <p>Onze tool doorzoekt onze database met parfums en geeft elke geur een score op basis van jouw antwoorden: komt de persoonlijkheid overeen, past de sterkte (sillage) bij wat je zocht, valt het binnen budget. Geen zwarte doos, bij elk resultaat leggen we uit waarom het past.</p>
   <h2>Waarom laten jullie ook "minder populaire" opties zien?</h2>
   <p>Omdat een eerlijk advies niet alleen bestsellers pusht. Een geur kan populair zijn omdat hij goed en veilig is, maar dat maakt hem niet per se de beste match voor jouw situatie. We laten je daarom altijd meerdere opties zien, en je kunt met één klik meer alternatieven bekijken.</p>
 </section>
@@ -541,7 +541,7 @@ def build_over_ons():
 <section class="container reveal" style="max-width:900px;margin:0 auto 8px"><div class="bottle" style="height:260px;border-radius:var(--radius-lg)">{marketing_photo_html("over-ons", "ParfumPicker")}</div></section>
 <section class="section container prose">
   <p>ParfumPicker.nl is gestart vanuit een simpele frustratie: parfum kopen als cadeau is verrassend lastig als je zelf geen parfumkenner bent. Bestaande parfumsites zijn gebouwd vóór en dóór liefhebbers, met vaktermen als "chypre" en "oosters-houtachtig" die weinig zeggen als je gewoon een leuk cadeau zoekt voor je moeder, partner of collega.</p>
-  <p>Daarom bouwden we een tool die andersom werkt: jij beschrijft de persoon en de gelegenheid, wij vertalen dat naar een parfum dat past, mét uitleg waarom.</p>
+  <p>Daarom bouwden we een tool die andersom werkt: jij beschrijft de persoon, wij vertalen dat naar een parfum dat past, mét uitleg waarom.</p>
   <p>We werken onafhankelijk: we sturen op match, niet op wat toevallig het duurst is of het meest in de aanbieding. Waar het kan bouwen we onze database uit en verbeteren we de aanbevelingen, altijd met hetzelfde uitgangspunt: eerlijk, gratis en zonder gedoe.</p>
 </section>
 '''
@@ -551,7 +551,7 @@ def build_over_ons():
 FAQS = [
     ("Is ParfumPicker echt helemaal gratis?", "Ja. Je betaalt niets, wij verdienen (op termijn) via advertenties en eventuele partnerlinks naar winkels, nooit via een account of abonnement."),
     ("Moet ik me registreren of een e-mailadres achterlaten?", "Nee. Je kunt de wizard direct gebruiken zonder account, zonder e-mailadres."),
-    ("Hoe weten jullie of een parfum echt goed past?", "We combineren data over notenpiramide, geurfamilie en stemmingen met jouw antwoorden over gelegenheid, budget en persoonlijkheid. Bij elk resultaat leggen we uit waarom het past."),
+    ("Hoe weten jullie of een parfum echt goed past?", "We combineren data over notenpiramide, geurfamilie en stemmingen met jouw antwoorden over persoonlijkheid, sillage en budget. Bij elk resultaat leggen we uit waarom het past."),
     ("Verkopen jullie zelf parfum?", "Nee, ParfumPicker is geen webshop. We geven onafhankelijk advies; waar je het uiteindelijk koopt is aan jou."),
     ("Waarom zie ik soms een parfum die ik niet ken?", "Omdat we bewust niet alleen bestsellers tonen. Een minder bekende geur kan alsnog de beste match zijn, dat is precies waar we op sturen."),
     ("Hebben jullie ook parfum voor dames?", "Onze database wordt uitgebreid; op dit moment is het aanbod het meest volledig voor herenparfums."),
@@ -662,7 +662,7 @@ ARTICLES = [
 <h2>Ga voor iets met meer karakter</h2><p>Waar je bij een verjaardag of kantoorcadeau vaak kiest voor iets veelzijdigs, mag een Valentijnscadeau best iets gedurfder of sensueler zijn. Geuren als <a href="../../parfums/versace-eros-edt/index.html">Eros</a> zijn precies om deze reden populair rond Valentijn, warm, opvallend, gemaakt om herinnerd te worden.</p>
 <h2>Denk aan het moment waarop het gedragen wordt</h2><p>Een Valentijnsgeur wordt meestal 's avonds gedragen, vaak tijdens een etentje of avondje uit. Dat betekent dat een geur met wat meer sillage (de "wolk" om iemand heen) hier juist goed op zijn plek is, in tegenstelling tot een subtiele kantoorgeur.</p>
 <h2>Persoonlijk, maar niet te specifiek</h2><p>Het blijft een cadeau, dus je hoeft niet te gokken op iets heel specifieks. Een geur die bij de persoonlijkheid van je partner past, gedurfd, klassiek, speels, is een betere gok dan een geur die alleen "romantisch" moet klinken.</p>
-<p><a href="../../wizard/index.html">Onze wizard</a> vraagt specifiek naar de gelegenheid, dus voor Valentijn krijg je automatisch geuren die daarbij passen.</p>''',
+<p><a href="../../wizard/index.html">Onze wizard</a> vraagt naar persoonlijkheid en hoe opvallend de geur mag zijn, dus je krijgt automatisch geuren die bij dit soort avond passen.</p>''',
     },
     {
         "slug": "parfum-cadeau-jubileum",
@@ -672,7 +672,7 @@ ARTICLES = [
 <h2>Kies iets met net iets meer statuur</h2><p>Bij een jubileum is dit een goed moment om net een stap hoger te gaan dan je normaal zou doen, bijvoorbeeld een geconcentreerdere variant (EDP of Parfum in plaats van EDT) van een geur die de persoon al kent en waardeert, zoals <a href="../../parfums/chanel-bleu-parfum/index.html">Bleu de Chanel Parfum</a>.</p>
 <h2>Klassieke, tijdloze geuren werken goed</h2><p>Een jubileum vraagt niet om het nieuwste, meest opvallende parfum, maar eerder om iets tijdloos, een geur waarvan je weet dat hij over jaren nog steeds relevant aanvoelt. Klassiekers hebben die status niet voor niets.</p>
 <h2>De verpakking en presentatie mogen meetellen</h2><p>Bij een mijlpaalcadeau als dit hoort vaak ook een mooiere verpakking of een iets uitgebreidere presentatie. Dat verandert niets aan de geur zelf, maar versterkt wel het gevoel dat het cadeau bij de gelegenheid past.</p>
-<p>Geef "jubileum" aan als gelegenheid in <a href="../../wizard/index.html">de wizard</a> voor een advies dat recht doet aan het moment.</p>''',
+<p>Kies in <a href="../../wizard/index.html">de wizard</a> voor een verfijnde, klassieke persoonlijkheid en een iets hoger budget voor een advies dat recht doet aan het moment.</p>''',
     },
     {
         "slug": "frisse-geuren-uitgelegd",
@@ -682,7 +682,7 @@ ARTICLES = [
 <h2>Wat maakt een geur "fris"?</h2><p>Frisse geuren leunen op citrusnoten (bergamot, citroen, grapefruit), groene of aromatische tonen en soms watergedreven accenten. Ze missen de zwaarte van amber of hout, wat ze luchtiger en directer laat aanvoelen.</p>
 <h2>Wanneer werkt een frisse geur het beste?</h2><p>Overdag, op kantoor, in warmere maanden en bij dagelijks gebruik, dit zijn de momenten waar frisse geuren het meest op hun plek zijn. Ze zijn subtieler dan een zware avondgeur en vallen minder snel op in een besloten ruimte zoals een kantoor.</p>
 <h2>Goede voorbeelden</h2><p>Geuren als <a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> combineren frisheid met net genoeg diepte om ook 's avonds te werken, precies waarom ze zo populair zijn als allround keuze.</p>
-<p>Wil je weten of een frisse geur bij iemand past? <a href="../../wizard/index.html">Onze wizard</a> houdt rekening met de geurfamilie op basis van persoonlijkheid en gelegenheid. Lees ook onze <a href="../geurfamilies-uitgelegd/index.html">algemene uitleg over geurfamilies</a> voor het volledige overzicht.</p>''',
+<p>Wil je weten of een frisse geur bij iemand past? <a href="../../wizard/index.html">Onze wizard</a> houdt rekening met de geurfamilie op basis van persoonlijkheid en hoe opvallend de geur mag zijn. Lees ook onze <a href="../geurfamilies-uitgelegd/index.html">algemene uitleg over geurfamilies</a> voor het volledige overzicht.</p>''',
     },
     {
         "slug": "amber-oosterse-geuren-uitgelegd",

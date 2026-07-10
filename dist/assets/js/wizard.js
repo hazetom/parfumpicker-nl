@@ -5,12 +5,11 @@
   var PERSONALITY_OPTIONS = ["gedurfd","zelfverzekerd","stoer","warm","fris","klassiek","modern","elegant","verfijnd","mysterieus","sportief","speels"];
   var AUTO_ADVANCE_DELAY = 220;
 
-  var GELEGENHEID_OPTIONS = [
-    {v:"verjaardag", l:"Verjaardag"},
-    {v:"kerst", l:"Kerst / Sinterklaas"},
-    {v:"valentijn", l:"Valentijn"},
-    {v:"jubileum", l:"Jubileum"},
-    {v:"elke gelegenheid", l:"Geen speciale gelegenheid"}
+  var SILLAGE_OPTIONS = [
+    {v:"subtiel", l:"Liever subtiel", match:["licht","intiem"]},
+    {v:"gemiddeld", l:"Gemiddeld, hoeft niet op te vallen", match:["gemiddeld"]},
+    {v:"opvallend", l:"Mag goed opvallen", match:["sterk","zeer sterk"]},
+    {v:"geen_voorkeur", l:"Maakt me niet uit", match:null}
   ];
   var MOMENT_OPTIONS = [
     {v:"dagelijks", l:"Dagelijks"},
@@ -29,9 +28,9 @@
 
   var state = {
     geslacht: null,
-    gelegenheid: null,
     bekendeGeur: "",
     persoonlijkheid: [],
+    sillage: null,
     moment: [],
     seizoen: [],
     budget: null,
@@ -39,7 +38,7 @@
     shown: []
   };
 
-  var STEPS = ["geslacht","gelegenheid","bekend","persoonlijkheid","moment","budget","seizoen"];
+  var STEPS = ["geslacht","bekend","persoonlijkheid","sillage","budget","voorkeur"];
 
   var root = document.getElementById("wizardApp");
   var DATA = [];
@@ -132,13 +131,13 @@
     });
   }
 
-  function renderStepGelegenheid(){
-    renderShell('<span class="wizard-question">Wat is de gelegenheid?</span><p class="wizard-hint">Kies wat het dichtst in de buurt komt.</p><div class="option-grid" id="opts"></div>');
+  function renderStepSillage(){
+    renderShell('<span class="wizard-question">Hoe subtiel of opvallend mag de geur zijn?</span><p class="wizard-hint">Dit bepaalt de sterkte (sillage) van het parfum.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
-    GELEGENHEID_OPTIONS.forEach(function(o){
-      opts.appendChild(optionCard(o.l, state.gelegenheid===o.v, function(){
-        state.gelegenheid = o.v;
-        renderStepGelegenheid();
+    SILLAGE_OPTIONS.forEach(function(o){
+      opts.appendChild(optionCard(o.l, state.sillage===o.v, function(){
+        state.sillage = o.v;
+        renderStepSillage();
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
@@ -228,20 +227,6 @@
     }
   }
 
-  function renderStepMoment(){
-    renderShell('<span class="wizard-question">Draagt hij dit vooral dagelijks, of juist \'s avonds?</span><p class="wizard-hint">Kies wat past (optioneel, mag meerdere).</p><div class="option-grid" id="opts"></div>');
-    var opts = document.getElementById("opts");
-    MOMENT_OPTIONS.forEach(function(o){
-      var selected = state.moment.indexOf(o.v) > -1;
-      opts.appendChild(optionCard(o.l, selected, function(){
-        var i = state.moment.indexOf(o.v);
-        if (i>-1) state.moment.splice(i,1); else state.moment.push(o.v);
-        render();
-      }, true));
-    });
-    navForward(true, "Volgende", goNext, function(){ state.moment=[]; goNext(); });
-  }
-
   function renderStepBudget(){
     renderShell('<span class="wizard-question">Wat is je budget?</span><p class="wizard-hint">We houden ons hieraan bij elk advies.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
@@ -255,27 +240,44 @@
     });
   }
 
-  function renderStepSeizoen(){
-    renderShell('<span class="wizard-question">In welk seizoen wordt dit vooral gedragen?</span><p class="wizard-hint">Optioneel, voor extra verfijning.</p><div class="option-grid" id="opts"></div>');
-    var opts = document.getElementById("opts");
+  function renderStepVoorkeur(){
+    renderShell(
+      '<span class="wizard-question">Wanneer wordt dit vooral gedragen?</span>' +
+      '<p class="wizard-hint">Optioneel, voor extra verfijning. Mag meerdere per groep.</p>' +
+      '<div class="option-grid" id="optsMoment"></div>' +
+      '<p class="wizard-subhead">In welk seizoen?</p>' +
+      '<div class="option-grid" id="optsSeizoen"></div>'
+    );
+    var optsMoment = document.getElementById("optsMoment");
+    MOMENT_OPTIONS.forEach(function(o){
+      var selected = state.moment.indexOf(o.v) > -1;
+      optsMoment.appendChild(optionCard(o.l, selected, function(){
+        var i = state.moment.indexOf(o.v);
+        if (i>-1) state.moment.splice(i,1); else state.moment.push(o.v);
+        render();
+      }, true));
+    });
+    var optsSeizoen = document.getElementById("optsSeizoen");
     SEIZOEN_OPTIONS.forEach(function(o){
       var selected = state.seizoen.indexOf(o.v) > -1;
-      opts.appendChild(optionCard(o.l, selected, function(){
+      optsSeizoen.appendChild(optionCard(o.l, selected, function(){
         var i = state.seizoen.indexOf(o.v);
         if (i>-1) state.seizoen.splice(i,1); else state.seizoen.push(o.v);
         render();
       }, true));
     });
-    navForward(true, "Bekijk mijn advies", function(){ showResults(); }, function(){ state.seizoen=[]; showResults(); });
+    navForward(true, "Bekijk mijn advies", function(){ showResults(); }, function(){ state.moment=[]; state.seizoen=[]; showResults(); });
+  }
+
+  function sillageBucket(){
+    return SILLAGE_OPTIONS.filter(function(o){ return o.v === state.sillage; })[0] || null;
   }
 
   function scoreItem(item, ref){
     var score = 0;
-    if (state.gelegenheid) {
-      if (item.cadeau_gelegenheid.indexOf(state.gelegenheid) > -1) score += 3;
-      else if (item.cadeau_gelegenheid.indexOf("elke gelegenheid") > -1) score += 1;
-    }
     state.persoonlijkheid.forEach(function(t){ if (item.persoonlijkheid.indexOf(t) > -1) score += 2; });
+    var bucket = sillageBucket();
+    if (bucket && bucket.match && bucket.match.indexOf(item.sillage) > -1) score += 2;
     state.moment.forEach(function(m){ if (item.moment.indexOf(m) > -1) score += 1; });
     state.seizoen.forEach(function(s){ if (item.seizoen.indexOf(s) > -1) score += 1; });
     if (ref && ref.id !== item.id) {
@@ -365,11 +367,16 @@
 
   function reasonText(p){
     var bits = [];
-    if (state.gelegenheid && p.cadeau_gelegenheid.indexOf(state.gelegenheid)>-1) bits.push("past bij de gelegenheid die je koos");
     var overlap = state.persoonlijkheid.filter(function(t){ return p.persoonlijkheid.indexOf(t)>-1; });
     if (overlap.length) bits.push("sluit aan bij " + overlap.join(", "));
+    var bucket = sillageBucket();
+    if (bucket && bucket.match && bucket.match.indexOf(p.sillage) > -1) bits.push("heeft precies de sterkte die je zocht");
+    var momentOverlap = state.moment.filter(function(m){ return p.moment.indexOf(m)>-1; });
+    if (momentOverlap.length) bits.push("past bij hoe je 'm wil dragen");
+    var seizoenOverlap = state.seizoen.filter(function(s){ return p.seizoen.indexOf(s)>-1; });
+    if (seizoenOverlap.length) bits.push("past bij het seizoen dat je koos");
     if (!bits.length) bits.push("scoort goed op prijs en breed toepasbare kenmerken");
-    return "Dit " + bits.join(" en ") + ".";
+    return "Dit " + bits.slice(0,2).join(" en ") + ".";
   }
 
   function cardHtml(p, badge){
@@ -444,12 +451,11 @@
 
   var STEP_RENDERERS = {
     geslacht: renderStepGeslacht,
-    gelegenheid: renderStepGelegenheid,
     bekend: renderStepBekend,
     persoonlijkheid: renderStepPersoonlijkheid,
-    moment: renderStepMoment,
+    sillage: renderStepSillage,
     budget: renderStepBudget,
-    seizoen: renderStepSeizoen
+    voorkeur: renderStepVoorkeur
   };
 
   function render(){
@@ -460,9 +466,9 @@
 
   function resetWizard(){
     state.geslacht = null;
-    state.gelegenheid = null;
     state.bekendeGeur = "";
     state.persoonlijkheid = [];
+    state.sillage = null;
     state.moment = [];
     state.seizoen = [];
     state.budget = null;

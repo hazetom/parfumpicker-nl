@@ -170,6 +170,7 @@ p{margin:0 0 1em}
 
 .wizard-question{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.01em;display:block;margin-bottom:6px}
 .wizard-hint{color:var(--text-muted);font-size:14.5px;margin-bottom:20px}
+.wizard-subhead{font-family:var(--font-display);font-weight:700;font-size:15px;margin:22px 0 12px}
 
 .option-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 @media(max-width:520px){.option-grid .option-card:last-child:nth-child(odd){grid-column:1/-1}}
