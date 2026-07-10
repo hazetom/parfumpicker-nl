@@ -651,6 +651,46 @@ ARTICLES = [
 <h2>De verpakking en presentatie mogen meetellen</h2><p>Bij een mijlpaalcadeau als dit hoort vaak ook een mooiere verpakking of een iets uitgebreidere presentatie. Dat verandert niets aan de geur zelf, maar versterkt wel het gevoel dat het cadeau bij de gelegenheid past.</p>
 <p>Geef "jubileum" aan als gelegenheid in <a href="../../wizard/index.html">de wizard</a> voor een advies dat recht doet aan het moment.</p>''',
     },
+    {
+        "slug": "frisse-geuren-uitgelegd",
+        "title": "Frisse geuren uitgelegd: wanneer werkt een fris parfum het beste?",
+        "excerpt": "Citrus, groen, watergedreven: frisse geuren zijn de meest gedragen categorie, en niet zonder reden. Dit is wanneer ze het beste werken.",
+        "body": '''<p>Fris is verreweg de meest gedragen geurfamilie bij herenparfum &mdash; en dat is geen toeval. Deze geuren zijn ontworpen om schoon, actief en breed toepasbaar aan te voelen, wat ze tot een veilige keuze maakt in bijna elke situatie.</p>
+<h2>Wat maakt een geur "fris"?</h2><p>Frisse geuren leunen op citrusnoten (bergamot, citroen, grapefruit), groene of aromatische tonen en soms watergedreven accenten. Ze missen de zwaarte van amber of hout, wat ze luchtiger en directer laat aanvoelen.</p>
+<h2>Wanneer werkt een frisse geur het beste?</h2><p>Overdag, op kantoor, in warmere maanden en bij dagelijks gebruik &mdash; dit zijn de momenten waar frisse geuren het meest op hun plek zijn. Ze zijn subtieler dan een zware avondgeur en vallen minder snel op in een besloten ruimte zoals een kantoor.</p>
+<h2>Goede voorbeelden</h2><p>Geuren als <a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> combineren frisheid met net genoeg diepte om ook 's avonds te werken &mdash; precies waarom ze zo populair zijn als allround keuze.</p>
+<p>Wil je weten of een frisse geur bij iemand past? <a href="../../wizard/index.html">Onze wizard</a> houdt rekening met de geurfamilie op basis van persoonlijkheid en gelegenheid. Lees ook onze <a href="../geurfamilies-uitgelegd/index.html">algemene uitleg over geurfamilies</a> voor het volledige overzicht.</p>''',
+    },
+    {
+        "slug": "amber-oosterse-geuren-uitgelegd",
+        "title": "Amber en oosterse geuren uitgelegd: voor wie is dit een goed cadeau?",
+        "excerpt": "Warm, kruidig, soms zoet: amber-geuren zijn de tegenpool van fris. Voor wie is dit een goede match, en wanneer werkt het het beste?",
+        "body": '''<p>Waar frisse geuren luchtig en direct zijn, is de amberfamilie (vroeger vaak "oosters" genoemd) juist warm, rijk en soms zoet. Het is een geurfamilie met karakter, en niet voor elke gelegenheid de eerste keuze &mdash; maar wanneer het past, valt het echt op.</p>
+<h2>Wat maakt een geur "amber"?</h2><p>Denk aan vanille, kruiden zoals kaneel of kardemom, harsachtige noten en soms tabak of leer. Deze noten geven een geur meer gewicht en een langere nazin dan de meeste frisse geuren.</p>
+<h2>Voor wie is dit een goed cadeau?</h2><p>Amber-geuren passen goed bij iemand met een zelfverzekerde, warme of gedurfde persoonlijkheid &mdash; iemand die niet bang is om op te vallen. Het is ook een sterke keuze voor de koudere maanden, wanneer een frisse geur soms wat te licht aanvoelt.</p>
+<h2>Wanneer werkt het het beste?</h2><p>'s Avonds, in de herfst en winter, en bij gelegenheden waar een geur mag opvallen &mdash; denk aan een avondje uit of een feestelijke gelegenheid. Geuren zoals <a href="../../parfums/paco-1million/index.html">1 Million</a> zijn een goed voorbeeld van hoe amber-accenten een geur direct herkenbaar en gedurfd maken.</p>
+<p>Twijfel je of amber bij iemand past? <a href="../../wizard/index.html">De wizard</a> vraagt naar persoonlijkheid en moment, en weegt dat automatisch mee.</p>''',
+    },
+    {
+        "slug": "houtachtige-geuren-uitgelegd",
+        "title": "Houtachtige geuren uitgelegd: de klassieke, tijdloze keuze",
+        "excerpt": "Cederhout, vetiver, sandelhout: houtachtige geuren zitten tussen fris en amber in, en zijn daardoor een van de veelzijdigste categorieën.",
+        "body": '''<p>Houtachtige geuren zijn misschien wel de meest tijdloze categorie binnen herenparfum. Ze combineren de toegankelijkheid van fris met net iets meer diepte, wat ze geschikt maakt voor bijna elke gelegenheid.</p>
+<h2>Wat maakt een geur "houtachtig"?</h2><p>De basis ligt in noten als cederhout, vetiver, sandelhout en patchouli &mdash; aardse, droge tonen die een geur warmte geven zonder dat het meteen zwaar of zoet wordt.</p>
+<h2>Waarom deze categorie zo veelzijdig is</h2><p>Houtachtige geuren zitten precies tussen fris en amber in qua karakter. Ze werken overdag én 's avonds, in de zomer én de winter &mdash; wat ze tot een van de veiligste keuzes maakt als je niet zeker weet in welke context de geur gedragen gaat worden.</p>
+<h2>Goede voorbeelden</h2><p>Klassiekers als <a href="../../parfums/chanel-bleu-edt/index.html">Bleu de Chanel</a> laten precies zien waarom deze familie zo populair is: elegant genoeg voor kantoor, veelzijdig genoeg voor de avond.</p>
+<p>Zoek je een geur die niet te uitgesproken is, maar ook niet saai? <a href="../../wizard/index.html">Onze wizard</a> houdt hier rekening mee. Meer weten over de andere families? Bekijk onze <a href="../geurfamilies-uitgelegd/index.html">algemene uitleg over geurfamilies</a>.</p>''',
+    },
+    {
+        "slug": "lijkt-op-parfums-dupes-uitgelegd",
+        "title": "'Lijkt op'-parfums: hoe werkt dupe-zoeken en is het de moeite waard?",
+        "excerpt": "Een goedkopere geur die lijkt op een bekende, dure klassieker &mdash; hoe eerlijk is dat eigenlijk, en wanneer is het een goed idee?",
+        "body": '''<p>Je ziet het steeds vaker: een parfum dat wordt aangeprezen als "lijkt op" een bekende, duurdere geur. Dat roept een logische vraag op: is dat eigenlijk eerlijk, en is het de moeite waard?</p>
+<h2>Wat betekent "lijkt op" precies?</h2><p>Het gaat hier niet om een illegale kopie of namaak &mdash; dat is iets anders en raden we altijd af. Het gaat om geuren die, door overlappende noten en accords, een vergelijkbaar geurprofiel hebben als een bekendere, vaak duurdere geur, zonder de formule te kopiëren. Op ParfumPicker gebruiken we dit veld puur als extra informatie: welke geuren een vergelijkbaar karakter hebben, zodat je een budgetvriendelijker alternatief kunt overwegen.</p>
+<h2>Een bekend voorbeeld</h2><p><a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> van Dior is een van de meest "gedupliceerde" geuren ter wereld, juist omdat het zo'n herkenbaar en populair profiel heeft. Alternatieven met een vergelijkbaar karakter zijn vaak een fractie van de prijs.</p>
+<h2>Is het de moeite waard?</h2><p>Dat hangt af van wat je zoekt. Voor een budgetvriendelijk cadeau of als eerste kennismaking met een bepaald geurprofiel, kan een "lijkt op"-alternatief prima werken. Maar een dupe is zelden identiek &mdash; de nuances en de nazin verschillen vaak net genoeg om het geen 1-op-1 vervanging te maken. Zie het als een verwant alternatief, niet als een kopie.</p>
+<p>Op elke <a href="../../parfums/dior-sauvage-edt/index.html">parfumpagina</a> op ParfumPicker vind je, waar relevant, vergelijkbare geuren &mdash; zodat je zelf kunt vergelijken.</p>''',
+    },
 ]
 
 def build_cadeau_inspiratie():
