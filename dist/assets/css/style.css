@@ -131,7 +131,7 @@ p{margin:0 0 1em}
 .wizard-embed::before{
   content:"";position:absolute;top:-220px;left:50%;transform:translateX(-50%);
   width:900px;height:520px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(2,95,97,.16),rgba(2,95,97,0) 72%);
+  background:radial-gradient(closest-side,rgba(2,95,97,.09),rgba(2,95,97,0) 72%);
 }
 .wizard-kicker{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-weight:700;font-size:13.5px;color:var(--accent-dark);margin-bottom:18px}
 .wizard-kicker .icon{width:16px;height:16px}
