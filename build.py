@@ -568,6 +568,49 @@ ARTICLES = [
 <h2>Bloemig</h2><p>Minder gangbaar bij herenparfum, maar wel aanwezig als subtiele laag in veel geuren.</p>
 <p>Twijfel je nog steeds? Onze <a href="../../wizard/index.html">gratis wizard</a> vertaalt dit automatisch voor je.</p>''',
     },
+    {
+        "slug": "wat-betekent-edt-edp-parfum",
+        "title": "Wat betekent EDT, EDP en Parfum eigenlijk?",
+        "excerpt": "Die letters op het flesje zeggen meer dan je denkt: over hoe lang de geur blijft hangen én over de prijs. Kort uitgelegd.",
+        "body": '''<p>Op bijna elk parfumflesje staat een afkorting: EDT, EDP, soms gewoon "Parfum". Dat is geen marketingtaal &mdash; het zegt iets concreets over wat je koopt.</p>
+<h2>Het draait om concentratie</h2><p>Deze letters verwijzen naar het percentage geurolie in het flesje. Hoe meer geurolie, hoe intenser de geur ruikt en hoe langer hij blijft hangen. Eau de Toilette (EDT) zit meestal rond de 5-15%, Eau de Parfum (EDP) rond de 15-20%, en Parfum (of Extrait) kan boven de 20% zitten.</p>
+<h2>Wat betekent dat in de praktijk?</h2><p>Een EDT is over het algemeen lichter en frisser, en werkt goed voor overdag of als je liever een subtiele geur draagt. Een EDP of Parfum trekt meer aandacht, houdt langer stand &mdash; vaak 6 tot 8 uur of meer &mdash; en is meestal ook duurder per flesje, al gebruik je er doorgaans ook minder van per keer.</p>
+<h2>Wat betekent dit voor een cadeau?</h2><p>Voor een cadeau is dit vooral relevant als je weet hoe iemand geuren draagt. Houdt de ontvanger van een subtiele, alledaagse geur? Dan is een EDT een veilige keuze. Zoekt diegene juist iets met meer statement voor de avond of een speciale gelegenheid? Dan is een EDP of Parfum vaak een betere match.</p>
+<p>Twijfel je welke concentratie bij iemand past? Onze <a href="../../wizard/index.html">gratis wizard</a> houdt hier automatisch rekening mee.</p>''',
+    },
+    {
+        "slug": "hoe-lang-blijft-parfum-ruiken",
+        "title": "Hoe lang blijft een parfum ruiken?",
+        "excerpt": "Longevity en sillage zijn de twee termen die bepalen hoe een geur zich gedraagt. Wat betekenen ze, en wat kun je realistisch verwachten?",
+        "body": '''<p>Een van de meestgestelde vragen bij een parfumcadeau: hoe lang ruik je dit eigenlijk nog? Het antwoord hangt af van twee dingen: longevity en sillage.</p>
+<h2>Longevity: hoe lang je 'm zelf nog ruikt</h2><p>Longevity is de tijd dat je de geur op je eigen huid kunt blijven waarnemen. Dit varieert van een paar uur bij lichte, frisse geuren tot een hele dag bij zwaardere, houtachtige of amberachtige parfums. Concentratie speelt hierin een grote rol &mdash; zie ook ons artikel over EDT versus EDP.</p>
+<h2>Sillage: wat anderen ruiken</h2><p>Sillage (Frans voor "spoor") is hoeveel geur er om je heen hangt, en hoe ver anderen het kunnen ruiken. Een parfum kan een prima longevity hebben maar toch een intieme sillage, wat betekent dat je 'm zelf nog goed ruikt terwijl anderen het pas merken als ze dichtbij komen.</p>
+<h2>Wat is realistisch?</h2><p>Verwacht geen wondermiddel: huidtype, temperatuur en zelfs wat je eet kunnen invloed hebben op hoe een parfum zich gedraagt. Wat wij aangeven bij elke geur op ParfumPicker is een realistische inschatting op basis van het type parfum &mdash; geen belofte, maar een handvat om te weten wat je kunt verwachten.</p>
+<p>Zoek je een geur die de hele dag meegaat? Geef dat aan in <a href="../../wizard/index.html">de wizard</a> en we houden er rekening mee.</p>''',
+    },
+    {
+        "slug": "veelgemaakte-fouten-parfum-cadeau",
+        "title": "De meest gemaakte fouten bij het kiezen van een parfumcadeau",
+        "excerpt": "Een parfum cadeau doen lijkt simpel, tot je voor het schap staat. Dit zijn de valkuilen die een goedbedoeld cadeau alsnog laten mislukken.",
+        "body": '''<p>Parfum is een populair cadeau, maar ook een cadeau waar je makkelijk de plank mee mis kunt slaan. Dit zijn de fouten die we het vaakst zien.</p>
+<h2>Kiezen op basis van je eigen smaak</h2><p>De meest voorkomende valkuil: je koopt een geur die jíj lekker vindt, in plaats van iets dat past bij de persoonlijkheid en stijl van de ontvanger. Wat voor jou een fijne, frisse geur is, kan voor iemand anders volledig niet aanvoelen.</p>
+<h2>Een te opvallende geur voor een onbekende gelegenheid</h2><p>Een sterke, gedurfde avondgeur is geweldig &mdash; voor de juiste gelegenheid. Als je niet zeker weet wanneer of waar iemand het gaat dragen, is een veelzijdigere, minder uitgesproken geur vaak de veiligere keuze.</p>
+<h2>Afgaan op prijs in plaats van match</h2><p>Duurder is niet automatisch beter passend. Een goedkopere geur die precies bij iemand past, is een beter cadeau dan een prijzige fles die niemand ooit opmaakt.</p>
+<h2>Geen idee hebben en dan maar gokken</h2><p>Begrijpelijk &mdash; parfumjargon is ontoegankelijk als je er niet middenin zit. Maar gokken op een merknaam die je toevallig kent, is niet nodig. Beantwoord een paar simpele vragen over de ontvanger en laat een tool het uitzoeken.</p>
+<p>Precies hiervoor bestaat <a href="../../wizard/index.html">onze gratis wizard</a>: geen giswerk, wel een onderbouwd advies.</p>''',
+    },
+    {
+        "slug": "prijsklasses-parfum-cadeau-uitgelegd",
+        "title": "Wat kost een goed parfumcadeau? Prijsklasses uitgelegd",
+        "excerpt": "Van budgetvriendelijk tot luxe: wat kun je verwachten voor je geld, en hoeveel moet je eigenlijk uitgeven voor een goed cadeau?",
+        "body": '''<p>Een van de praktischste vragen bij een parfumcadeau: hoeveel geef je eigenlijk uit? Op ParfumPicker werken we met vier prijsklasses, van &euro; tot &euro;&euro;&euro;&euro;, zodat je precies binnen jouw budget kunt zoeken.</p>
+<h2>&euro; &mdash; tot &euro;40</h2><p>In dit segment vind je toegankelijke, vaak fris-frisse geuren die prima werken als dagelijkse geur of als eerste kennismaking. Denk aan geuren als <a href="../../parfums/paco-1million/index.html">1 Million</a> of vergelijkbare toegankelijke klassiekers &mdash; niet de meest exclusieve keuze, maar wel een veilige.</p>
+<h2>&euro;&euro; &mdash; &euro;40 tot &euro;80</h2><p>Dit is het segment waar de meeste bekende, veelgeprezen herengeuren in zitten &mdash; denk aan geuren als <a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> of <a href="../../parfums/chanel-bleu-edt/index.html">Bleu de Chanel</a>. Een prima balans tussen prijs en kwaliteit voor de meeste cadeau-gelegenheden.</p>
+<h2>&euro;&euro;&euro; &mdash; &euro;80 tot &euro;150</h2><p>Hier kom je in het segment van geconcentreerdere versies (EDP, Parfum) en meer exclusieve merken. Een goede keuze als je net iets meer wilt uitgeven voor een verjaardag of jubileum.</p>
+<h2>&euro;&euro;&euro;&euro; &mdash; geen limiet</h2><p>Niche- en luxemerken, vaak met een meer uitgesproken karakter en kleinere oplages. Voor wie echt indruk wil maken of houdt van iets minder alledaags.</p>
+<h2>Duurder is niet automatisch beter</h2><p>Het belangrijkste om te onthouden: een hogere prijs betekent niet automatisch een betere match. Een geur van &euro;35 die precies bij iemand past, is een beter cadeau dan een fles van &euro;120 die niet aanslaat.</p>
+<p>Geef je budget aan in <a href="../../wizard/index.html">de wizard</a> en we zoeken binnen die grens naar de beste match.</p>''',
+    },
 ]
 
 def build_cadeau_inspiratie():
