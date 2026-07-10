@@ -611,6 +611,46 @@ ARTICLES = [
 <h2>Duurder is niet automatisch beter</h2><p>Het belangrijkste om te onthouden: een hogere prijs betekent niet automatisch een betere match. Een geur van &euro;35 die precies bij iemand past, is een beter cadeau dan een fles van &euro;120 die niet aanslaat.</p>
 <p>Geef je budget aan in <a href="../../wizard/index.html">de wizard</a> en we zoeken binnen die grens naar de beste match.</p>''',
     },
+    {
+        "slug": "parfum-cadeau-verjaardag",
+        "title": "Beste parfums voor een verjaardagscadeau (mannen)",
+        "excerpt": "Een verjaardag is misschien wel de meest voorkomende gelegenheid om parfum cadeau te doen. Waar let je op, en welke geuren zijn een veilige gok?",
+        "body": '''<p>Een verjaardag is de meest gekozen gelegenheid voor een parfumcadeau &mdash; en ook de gelegenheid met de meeste ruimte. Er is geen vaste "verjaardagsgeur", wat het juist makkelijker maakt: je hebt meer vrijheid om te kiezen op basis van wie de persoon is, in plaats van wat de gelegenheid vereist.</p>
+<h2>Ken je de persoon goed? Ga wat gedurfder</h2><p>Bij een verjaardag van een partner, goede vriend of familielid die je goed kent, kun je iets specifieker kiezen &mdash; een geur die echt bij zijn of haar persoonlijkheid past, ook als die iets uitgesprokener is.</p>
+<h2>Ken je de persoon minder goed? Kies veelzijdig</h2><p>Voor een collega of iemand die je minder goed kent, is een breed inzetbare, niet te overheersende geur de veiligere keuze. Klassiekers als <a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> of <a href="../../parfums/chanel-bleu-edt/index.html">Bleu de Chanel</a> werken bij bijna iedereen, precies omdat ze veelzijdig zijn.</p>
+<h2>Budget hoeft geen probleem te zijn</h2><p>Een verjaardagscadeau hoeft niet duur te zijn om goed te zijn &mdash; zie ook ons artikel over prijsklasses. Een geur die goed past, wint het altijd van een dure geur die niet aanslaat.</p>
+<p>Beantwoord een paar vragen in <a href="../../wizard/index.html">de wizard</a> en ontvang een advies afgestemd op deze specifieke verjaardag.</p>''',
+    },
+    {
+        "slug": "parfum-cadeau-kerst-sinterklaas",
+        "title": "Parfum cadeau doen met Kerst en Sinterklaas",
+        "excerpt": "De feestdagen zijn hét moment voor een iets luxere geur. Wat maakt een parfum geschikt als kerst- of sinterklaascadeau?",
+        "body": '''<p>Kerst en Sinterklaas zijn traditioneel de piekmomenten voor parfumcadeaus &mdash; en met reden. De feestdagen lenen zich goed voor een iets luxere, warmere keuze dan je misschien de rest van het jaar zou kiezen.</p>
+<h2>Warmere, rijkere geuren passen bij het seizoen</h2><p>Winterse gelegenheden zijn een goed moment voor houtachtige of amberachtige geuren &mdash; warmer en voller dan de frisse geuren die in de zomer populair zijn. Denk aan geuren met kruidige, houtige of vanille-achtige accenten.</p>
+<h2>Het cadeau-moment zelf mag ook meespelen</h2><p>Bij Kerst wordt een cadeau vaak in gezelschap uitgepakt, en bij Sinterklaas hoort er soms een gedicht of verpakking bij. Een net iets mooiere doos of een bekender merk kan hier net dat beetje extra feestelijkheid geven &mdash; zonder dat het cadeau zelf duurder hoeft te zijn.</p>
+<h2>Twijfel je? Een breed toepasbare geur is nooit fout</h2><p>Als je niet zeker weet wat iemand mooi vindt, blijft een veelzijdige, herkenbare geur als <a href="../../parfums/dior-sauvage-edt/index.html">Sauvage</a> of <a href="../../parfums/chanel-bleu-parfum/index.html">Bleu de Chanel Parfum</a> een solide keuze voor onder de kerstboom.</p>
+<p>Laat <a href="../../wizard/index.html">onze wizard</a> een geur uitzoeken die past bij het seizoen én bij de ontvanger.</p>''',
+    },
+    {
+        "slug": "parfum-cadeau-valentijn",
+        "title": "Parfum als Valentijnscadeau: waar moet je op letten?",
+        "excerpt": "Valentijn vraagt om een net iets persoonlijkere, verleidelijkere keuze. Dit maakt het verschil tussen een standaardcadeau en een cadeau dat opvalt.",
+        "body": '''<p>Valentijnsdag is anders dan de meeste andere cadeau-momenten: het is intiemer, persoonlijker, en de geur mag best iets meer aandacht trekken dan op een doordeweekse dag.</p>
+<h2>Ga voor iets met meer karakter</h2><p>Waar je bij een verjaardag of kantoorcadeau vaak kiest voor iets veelzijdigs, mag een Valentijnscadeau best iets gedurfder of sensueler zijn. Geuren als <a href="../../parfums/versace-eros-edt/index.html">Eros</a> zijn precies om deze reden populair rond Valentijn &mdash; warm, opvallend, gemaakt om herinnerd te worden.</p>
+<h2>Denk aan het moment waarop het gedragen wordt</h2><p>Een Valentijnsgeur wordt meestal 's avonds gedragen, vaak tijdens een etentje of avondje uit. Dat betekent dat een geur met wat meer sillage (de "wolk" om iemand heen) hier juist goed op zijn plek is, in tegenstelling tot een subtiele kantoorgeur.</p>
+<h2>Persoonlijk, maar niet te specifiek</h2><p>Het blijft een cadeau, dus je hoeft niet te gokken op iets heel specifieks. Een geur die bij de persoonlijkheid van je partner past &mdash; gedurfd, klassiek, speels &mdash; is een betere gok dan een geur die alleen "romantisch" moet klinken.</p>
+<p><a href="../../wizard/index.html">Onze wizard</a> vraagt specifiek naar de gelegenheid, dus voor Valentijn krijg je automatisch geuren die daarbij passen.</p>''',
+    },
+    {
+        "slug": "parfum-cadeau-jubileum",
+        "title": "Het perfecte parfumcadeau voor een jubileum",
+        "excerpt": "Een jubileum &mdash; werk, huwelijk of anderszins &mdash; vraagt om een cadeau dat de gelegenheid recht doet. Zo kies je iets met net dat beetje meer statuur.",
+        "body": '''<p>Een jubileum is een gelegenheid met gewicht &mdash; of het nu een werkjubileum, huwelijksjubileum of een andere mijlpaal is. Dat mag het cadeau ook laten zien, zonder dat het meteen extravagant hoeft te worden.</p>
+<h2>Kies iets met net iets meer statuur</h2><p>Bij een jubileum is dit een goed moment om net een stap hoger te gaan dan je normaal zou doen &mdash; bijvoorbeeld een geconcentreerdere variant (EDP of Parfum in plaats van EDT) van een geur die de persoon al kent en waardeert, zoals <a href="../../parfums/chanel-bleu-parfum/index.html">Bleu de Chanel Parfum</a>.</p>
+<h2>Klassieke, tijdloze geuren werken goed</h2><p>Een jubileum vraagt niet om het nieuwste, meest opvallende parfum, maar eerder om iets tijdloos &mdash; een geur waarvan je weet dat hij over jaren nog steeds relevant aanvoelt. Klassiekers hebben die status niet voor niets.</p>
+<h2>De verpakking en presentatie mogen meetellen</h2><p>Bij een mijlpaalcadeau als dit hoort vaak ook een mooiere verpakking of een iets uitgebreidere presentatie. Dat verandert niets aan de geur zelf, maar versterkt wel het gevoel dat het cadeau bij de gelegenheid past.</p>
+<p>Geef "jubileum" aan als gelegenheid in <a href="../../wizard/index.html">de wizard</a> voor een advies dat recht doet aan het moment.</p>''',
+    },
 ]
 
 def build_cadeau_inspiratie():
