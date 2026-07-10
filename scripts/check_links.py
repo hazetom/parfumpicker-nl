@@ -21,7 +21,7 @@ if __name__ == "__main__":
                 if href.startswith(("http://", "https://", "mailto:", "#")):
                     continue
                 total += 1
-                target = os.path.normpath(os.path.join(dirpath, href.split("#")[0]))
+                target = os.path.normpath(os.path.join(dirpath, href.split("#")[0].split("?")[0]))
                 if not os.path.exists(target):
                     broken.append((path, href))
     print(f"{total} interne links gecontroleerd")
