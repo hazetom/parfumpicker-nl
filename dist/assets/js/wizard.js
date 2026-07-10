@@ -225,10 +225,35 @@
     return pool.map(function(x){ return x.p; });
   }
 
-  function bottleSvgInline(fam){
+  function bottleShapeIndex(id){
+    // Mirrors build.py's shape_index() exactly: sum of char codes mod 3.
+    // Must NOT use any language/runtime-randomized hash - this has to agree
+    // with the Python side for the same id on every page load.
+    if (!id) return 0;
+    var s = 0;
+    for (var i=0; i<id.length; i++) s += id.charCodeAt(i);
+    return s % 3;
+  }
+
+  function bottleSvgInline(fam, id){
     var tints = {"Fris":["#BFE3DE","#5FA79E"],"Amber":["#F0D9B5","#C2833F"],"Houtachtig":["#DCD3C1","#8C7355"],"Bloemig":["#F2D9E6","#C97AA0"]};
     var t = tints[fam] || tints["Fris"];
-    return '<svg viewBox="0 0 140 180" width="140" height="180"><rect x="44" y="18" width="24" height="16" rx="3" fill="#ccc"/><rect x="40" y="6" width="32" height="16" rx="4" fill="#3a3a3a"/><path d="M36 34h40c6 0 10 5 10 11v96c0 8-6 14-14 14H40c-8 0-14-6-14-14V45c0-6 4-11 10-11Z" fill="'+t[0]+'" stroke="'+t[1]+'" stroke-width="2"/><rect x="26" y="70" width="60" height="50" rx="4" fill="#FDFCFB" opacity=".78"/><rect x="32" y="82" width="48" height="4" rx="2" fill="'+t[1]+'" opacity=".55"/><rect x="32" y="92" width="34" height="4" rx="2" fill="'+t[1]+'" opacity=".35"/></svg>';
+    var shape = bottleShapeIndex(id);
+    var cap, body, label;
+    if (shape === 1) {
+      body = '<path d="M70 30c-12 0-22 4-22 16v112c0 10 10 18 22 18s22-8 22-18V46c0-12-10-16-22-16Z" fill="'+t[0]+'" stroke="'+t[1]+'" stroke-width="2"/>';
+      cap = '<rect x="58" y="16" width="24" height="14" rx="3" fill="#ccc"/><rect x="54" y="4" width="32" height="14" rx="4" fill="#3a3a3a"/>';
+      label = '<rect x="54" y="86" width="32" height="40" rx="4" fill="#FDFCFB" opacity=".78"/><rect x="58" y="96" width="24" height="4" rx="2" fill="'+t[1]+'" opacity=".55"/><rect x="58" y="104" width="16" height="4" rx="2" fill="'+t[1]+'" opacity=".35"/>';
+    } else if (shape === 2) {
+      body = '<rect x="20" y="32" width="100" height="118" rx="35" fill="'+t[0]+'" stroke="'+t[1]+'" stroke-width="2"/>';
+      cap = '<rect x="50" y="20" width="20" height="12" rx="3" fill="#ccc"/><rect x="46" y="10" width="28" height="12" rx="4" fill="#3a3a3a"/>';
+      label = '<rect x="35" y="70" width="70" height="50" rx="6" fill="#FDFCFB" opacity=".78"/><rect x="45" y="85" width="50" height="4" rx="2" fill="'+t[1]+'" opacity=".55"/><rect x="45" y="97" width="34" height="4" rx="2" fill="'+t[1]+'" opacity=".35"/>';
+    } else {
+      body = '<path d="M36 34h40c6 0 10 5 10 11v96c0 8-6 14-14 14H40c-8 0-14-6-14-14V45c0-6 4-11 10-11Z" fill="'+t[0]+'" stroke="'+t[1]+'" stroke-width="2"/>';
+      cap = '<rect x="44" y="18" width="24" height="16" rx="3" fill="#ccc"/><rect x="40" y="6" width="32" height="16" rx="4" fill="#3a3a3a"/>';
+      label = '<rect x="26" y="70" width="60" height="50" rx="4" fill="#FDFCFB" opacity=".78"/><rect x="32" y="82" width="48" height="4" rx="2" fill="'+t[1]+'" opacity=".55"/><rect x="32" y="92" width="34" height="4" rx="2" fill="'+t[1]+'" opacity=".35"/>';
+    }
+    return '<svg viewBox="0 0 140 180" width="140" height="180">'+cap+body+label+'</svg>';
   }
 
   function reasonText(p){
@@ -243,7 +268,7 @@
   function cardHtml(p, badge){
     return '<article class="perfume-card" style="width:auto">' +
       (badge ? '<div class="badge' + (badge.grey?' grey':'') + '">' + badge.text + '</div>' : '') +
-      '<div class="bottle">' + bottleSvgInline(p.familie_hoofd) + '</div>' +
+      '<div class="bottle">' + bottleSvgInline(p.familie_hoofd, p.id) + '</div>' +
       '<h3>' + p.naam + '</h3><div class="meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
       '<p>' + p.beschrijving + '</p>' +
       '<div class="result-explain">' + reasonText(p) + '</div>' +

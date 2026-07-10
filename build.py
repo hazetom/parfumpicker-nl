@@ -71,15 +71,42 @@ FAMILY_TINT = {
     "Houtachtig": ("#DCD3C1", "#8C7355"),
     "Bloemig": ("#F2D9E6", "#C97AA0"),
 }
-def bottle_svg(familie_hoofd="Fris", w=140, h=180):
+def shape_index(id_seed):
+    """Stable per-id shape pick (0-2). Not Python's hash() - that's randomized
+    per-process (PYTHONHASHSEED) and would disagree with wizard.js's mirror
+    of this same rule on every page load."""
+    if not id_seed:
+        return 0
+    return sum(ord(c) for c in id_seed) % 3
+
+def bottle_svg(familie_hoofd="Fris", id_seed="", w=140, h=180):
     light, dark = FAMILY_TINT.get(familie_hoofd, FAMILY_TINT["Fris"])
-    return f'''<svg viewBox="0 0 140 180" width="{w}" height="{h}" xmlns="http://www.w3.org/2000/svg">
-  <rect x="44" y="18" width="24" height="16" rx="3" fill="#ccc"/>
-  <rect x="40" y="6" width="32" height="16" rx="4" fill="#3a3a3a"/>
-  <path d="M36 34h40c6 0 10 5 10 11v96c0 8-6 14-14 14H40c-8 0-14-6-14-14V45c0-6 4-11 10-11Z" fill="{light}" stroke="{dark}" stroke-width="2"/>
-  <rect x="26" y="70" width="60" height="50" rx="4" fill="#FDFCFB" opacity=".78"/>
+    shape = shape_index(id_seed)
+    if shape == 1:
+        # tall narrow capsule flask
+        body = f'<path d="M70 30c-12 0-22 4-22 16v112c0 10 10 18 22 18s22-8 22-18V46c0-12-10-16-22-16Z" fill="{light}" stroke="{dark}" stroke-width="2"/>'
+        cap = '<rect x="58" y="16" width="24" height="14" rx="3" fill="#ccc"/>\n  <rect x="54" y="4" width="32" height="14" rx="4" fill="#3a3a3a"/>'
+        label = f'''<rect x="54" y="86" width="32" height="40" rx="4" fill="#FDFCFB" opacity=".78"/>
+  <rect x="58" y="96" width="24" height="4" rx="2" fill="{dark}" opacity=".55"/>
+  <rect x="58" y="104" width="16" height="4" rx="2" fill="{dark}" opacity=".35"/>'''
+    elif shape == 2:
+        # squat rounded flacon
+        body = f'<rect x="20" y="32" width="100" height="118" rx="35" fill="{light}" stroke="{dark}" stroke-width="2"/>'
+        cap = '<rect x="50" y="20" width="20" height="12" rx="3" fill="#ccc"/>\n  <rect x="46" y="10" width="28" height="12" rx="4" fill="#3a3a3a"/>'
+        label = f'''<rect x="35" y="70" width="70" height="50" rx="6" fill="#FDFCFB" opacity=".78"/>
+  <rect x="45" y="85" width="50" height="4" rx="2" fill="{dark}" opacity=".55"/>
+  <rect x="45" y="97" width="34" height="4" rx="2" fill="{dark}" opacity=".35"/>'''
+    else:
+        # original flask
+        body = f'<path d="M36 34h40c6 0 10 5 10 11v96c0 8-6 14-14 14H40c-8 0-14-6-14-14V45c0-6 4-11 10-11Z" fill="{light}" stroke="{dark}" stroke-width="2"/>'
+        cap = '<rect x="44" y="18" width="24" height="16" rx="3" fill="#ccc"/>\n  <rect x="40" y="6" width="32" height="16" rx="4" fill="#3a3a3a"/>'
+        label = f'''<rect x="26" y="70" width="60" height="50" rx="4" fill="#FDFCFB" opacity=".78"/>
   <rect x="32" y="82" width="48" height="4" rx="2" fill="{dark}" opacity=".55"/>
-  <rect x="32" y="92" width="34" height="4" rx="2" fill="{dark}" opacity=".35"/>
+  <rect x="32" y="92" width="34" height="4" rx="2" fill="{dark}" opacity=".35"/>'''
+    return f'''<svg viewBox="0 0 140 180" width="{w}" height="{h}" xmlns="http://www.w3.org/2000/svg">
+  {cap}
+  {body}
+  {label}
 </svg>'''
 
 print(f"Dataset geladen: {len(PERFUMES)} parfums")
@@ -246,7 +273,7 @@ def perfume_card_html(p, base, rank=None, badge=None):
     badge_html = f'<div class="badge">{esc(badge)}</div>' if badge else ""
     return f'''<article class="perfume-card">
   {rank_html}{badge_html}
-  <div class="bottle">{bottle_svg(p.get("familie_hoofd","Fris"))}</div>
+  <div class="bottle">{bottle_svg(p.get("familie_hoofd","Fris"), p.get("id",""))}</div>
   <h3>{esc(p["naam"])}</h3>
   <div class="meta">{esc(p["merk"])} &middot; {esc(p["concentratie"])}</div>
   <p>{esc(p["beschrijving"][:70])}{"…" if len(p["beschrijving"])>70 else ""}</p>
@@ -371,10 +398,10 @@ def build_perfume_page(p):
         match = _find_similar_link(naam)
         if match and match["id"] != p["id"]:
             similar_html += f'<a class="perfume-card" style="display:block;text-decoration:none" href="{rel("/parfums/"+match["id"]+"/", base)}">' \
-                             f'<div class="bottle">{bottle_svg(match.get("familie_hoofd","Fris"), w=90, h=120)}</div>' \
+                             f'<div class="bottle">{bottle_svg(match.get("familie_hoofd","Fris"), match.get("id",""), w=90, h=120)}</div>' \
                              f'<h3 style="font-size:15px">{esc(match["naam"])}</h3><div class="meta">{esc(match["merk"])}</div></a>'
         else:
-            similar_html += f'<div class="perfume-card"><div class="bottle">{bottle_svg(p.get("familie_hoofd","Fris"), w=90, h=120)}</div>' \
+            similar_html += f'<div class="perfume-card"><div class="bottle">{bottle_svg(p.get("familie_hoofd","Fris"), p.get("id",""), w=90, h=120)}</div>' \
                              f'<h3 style="font-size:15px">{esc(naam)}</h3><div class="meta">Vergelijkbare geur</div></div>'
 
     spec_items = [
@@ -390,7 +417,7 @@ def build_perfume_page(p):
 
     content = f'''
 <section class="container pd-hero">
-  <div class="pd-bottle">{bottle_svg(p.get("familie_hoofd","Fris"), w=220, h=280)}</div>
+  <div class="pd-bottle">{bottle_svg(p.get("familie_hoofd","Fris"), p.get("id",""), w=220, h=280)}</div>
   <div>
     <div class="eyebrow">{esc(p["merk"])}</div>
     <h1 style="font-size:clamp(28px,4vw,40px)">{esc(p["naam"])}</h1>
