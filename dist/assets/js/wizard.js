@@ -312,11 +312,15 @@
     return findMatches(state.bekendeGeur, 1)[0] || null;
   }
 
+  function genderPool(){
+    if (state.geslacht === "unisex") return DATA;
+    return DATA.filter(function(p){ return p.geslacht === state.geslacht; });
+  }
+
   function rankedList(){
-    if (state.geslacht !== "heren") return [];
     var budgetRank = PRICE_RANK[state.budget] || 4;
     var ref = findRef();
-    var pool = DATA.filter(function(p){ return PRICE_RANK[p.prijsklasse] <= budgetRank; });
+    var pool = genderPool().filter(function(p){ return PRICE_RANK[p.prijsklasse] <= budgetRank; });
     pool = pool.map(function(p){ return {p:p, s: scoreItem(p, ref)}; });
     pool.sort(function(a,b){ return b.s - a.s; });
     return pool.map(function(x){ return x.p; });
@@ -404,14 +408,14 @@
     try { history.pushState({}, "", "?resultaat=1"); } catch (e) {}
     var all = rankedList();
 
-    if (state.geslacht !== "heren") {
+    if (!all.length) {
       root.innerHTML =
         '<div class="wizard-panel" style="max-width:640px;margin:32px auto;text-align:center">' +
-        '<h2 style="font-size:22px">Bijna zover!</h2>' +
-        '<p style="color:var(--text-muted)">Onze database voor dames- en unisex-parfums breiden we op dit moment nog uit. Op dit moment hebben we het meeste advies voor herenparfums klaarstaan.</p>' +
-        '<button class="btn btn-primary" id="terugHeren">Toon adviezen voor herenparfums</button>' +
+        '<h2 style="font-size:22px">Geen match gevonden</h2>' +
+        '<p style="color:var(--text-muted)">Voor deze combinatie van antwoorden hebben we nog geen passend advies. Probeer een ruimer budget of begin opnieuw.</p>' +
+        '<button class="btn btn-primary" id="opnieuwBtn">Opnieuw beginnen</button>' +
         '</div>';
-      document.getElementById("terugHeren").onclick = function(){ state.geslacht = "heren"; showResults(); };
+      document.getElementById("opnieuwBtn").onclick = function(){ resetWizard(); };
       return;
     }
 
