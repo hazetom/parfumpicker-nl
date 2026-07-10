@@ -18,8 +18,8 @@
     {v:"uitgaan", l:"Uitgaan"}
   ];
   var SEIZOEN_OPTIONS = [
-    {v:"lente", l:"Lente"},{v:"zomer", l:"Zomer"},
-    {v:"herfst", l:"Herfst"},{v:"winter", l:"Winter"}
+    {v:"lente_zomer", l:"Lente / Zomer", match:["lente","zomer"]},
+    {v:"herfst_winter", l:"Herfst / Winter", match:["herfst","winter"]}
   ];
   var BUDGET_OPTIONS = [
     {v:"€", p:"€", l:"Tot €40"},{v:"€€", p:"€€", l:"€40 tot €80"},
@@ -273,13 +273,22 @@
     return SILLAGE_OPTIONS.filter(function(o){ return o.v === state.sillage; })[0] || null;
   }
 
+  function seizoenOverlapCount(item){
+    var n = 0;
+    state.seizoen.forEach(function(sKey){
+      var bucket = SEIZOEN_OPTIONS.filter(function(o){ return o.v === sKey; })[0];
+      if (bucket && item.seizoen.some(function(s){ return bucket.match.indexOf(s) > -1; })) n++;
+    });
+    return n;
+  }
+
   function scoreItem(item, ref){
     var score = 0;
     state.persoonlijkheid.forEach(function(t){ if (item.persoonlijkheid.indexOf(t) > -1) score += 2; });
     var bucket = sillageBucket();
     if (bucket && bucket.match && bucket.match.indexOf(item.sillage) > -1) score += 2;
     state.moment.forEach(function(m){ if (item.moment.indexOf(m) > -1) score += 1; });
-    state.seizoen.forEach(function(s){ if (item.seizoen.indexOf(s) > -1) score += 1; });
+    score += seizoenOverlapCount(item);
     if (ref && ref.id !== item.id) {
       var overlap = item.accords.filter(function(a){ return ref.accords.indexOf(a) > -1; }).length;
       score += overlap * 1.2;
@@ -373,8 +382,7 @@
     if (bucket && bucket.match && bucket.match.indexOf(p.sillage) > -1) bits.push("heeft precies de sterkte die je zocht");
     var momentOverlap = state.moment.filter(function(m){ return p.moment.indexOf(m)>-1; });
     if (momentOverlap.length) bits.push("past bij hoe je 'm wil dragen");
-    var seizoenOverlap = state.seizoen.filter(function(s){ return p.seizoen.indexOf(s)>-1; });
-    if (seizoenOverlap.length) bits.push("past bij het seizoen dat je koos");
+    if (seizoenOverlapCount(p) > 0) bits.push("past bij het seizoen dat je koos");
     if (!bits.length) bits.push("scoort goed op prijs en breed toepasbare kenmerken");
     return "Dit " + bits.slice(0,2).join(" en ") + ".";
   }
