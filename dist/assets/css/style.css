@@ -155,7 +155,11 @@ p{margin:0 0 1em}
 .ad-unit .ad-unit-size{font-size:11px;color:var(--border);font-weight:500;letter-spacing:0}
 .wizard-panel{position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:32px;margin:0 auto;max-width:860px}
 @media(min-width:640px){.wizard-panel{padding:44px 48px}}
-.wizard-step-label{font-size:13px;color:var(--text-muted);font-weight:700;margin-bottom:14px}
+.wizard-top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.wizard-step-label{font-size:13px;color:var(--text-muted);font-weight:700}
+.wizard-back{display:flex;align-items:center;gap:2px;background:none;border:0;padding:4px 2px;margin:-4px -2px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text-muted);cursor:pointer;transition:color .15s ease}
+.wizard-back:hover{color:var(--accent-dark)}
+.wizard-back-chevron{font-size:17px;line-height:1}
 
 /* Segmented progress: one bar per step, reads at a glance how far along you are */
 .progress-track{display:flex;gap:6px;margin-bottom:28px}
@@ -164,17 +168,19 @@ p{margin:0 0 1em}
 .progress-seg.done span{width:100%}
 .progress-seg.current span{width:55%}
 
-.wizard-question{font-family:var(--font-display);font-weight:700;font-size:23px;letter-spacing:-.01em;display:block;margin-bottom:6px}
+.wizard-question{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.01em;display:block;margin-bottom:6px}
 .wizard-hint{color:var(--text-muted);font-size:14.5px;margin-bottom:20px}
 
 .option-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 @media(max-width:520px){.option-grid .option-card:last-child:nth-child(odd){grid-column:1/-1}}
-.option-card{position:relative;border:2px solid var(--border);border-radius:var(--radius-sm);padding:20px 14px;text-align:center;cursor:pointer;background:#fff;transition:border-color .15s ease,background .15s ease,transform .15s ease,box-shadow .15s ease}
+.option-card{position:relative;border:2px solid var(--border);border-radius:var(--radius-sm);padding:22px 16px;text-align:center;cursor:pointer;background:#fff;font-weight:600;font-size:15.5px;transition:border-color .15s ease,background .15s ease,transform .15s ease,box-shadow .15s ease}
 .option-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
 .option-card:active{transform:translateY(0) scale(.98)}
 .option-card.selected{border-color:var(--accent);background:var(--accent-light);box-shadow:var(--shadow)}
 .option-card.selected::after{content:"";position:absolute;top:9px;right:9px;width:18px;height:18px;border-radius:50%;background:var(--accent) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>') center/11px no-repeat}
-.option-card .oi{width:28px;height:28px;margin:0 auto 10px;color:var(--accent)}
+.option-card.selected:not(.multi){animation:wizardPulse .28s ease}
+@keyframes wizardPulse{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.option-card.selected:not(.multi){animation:none}}
 .option-card .price{display:block;font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--accent);letter-spacing:.02em;margin-bottom:4px}
 
 /* Step transitions */
@@ -182,7 +188,7 @@ p{margin:0 0 1em}
 @keyframes wizardStepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){#wizardInner{animation:none}}
 
-.wizard-nav{display:flex;flex-wrap:wrap;justify-content:space-between;margin-top:28px;gap:12px}
+.wizard-nav{display:flex;flex-wrap:wrap;justify-content:flex-end;margin-top:28px;gap:12px}
 
 /* "Ken je al een merk" autocomplete */
 .autocomplete{position:relative}

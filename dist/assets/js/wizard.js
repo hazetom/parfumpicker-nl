@@ -3,34 +3,24 @@
 
   var PRICE_RANK = {"€":1,"€€":2,"€€€":3,"€€€€":4};
   var PERSONALITY_OPTIONS = ["gedurfd","zelfverzekerd","stoer","warm","fris","klassiek","modern","elegant","verfijnd","mysterieus","sportief","speels"];
-
-  var ICON_GIFT = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="9" width="18" height="4.2" rx="1"/><rect x="4.4" y="13.2" width="15.2" height="8" rx="1"/><path d="M12 9v12.2"/><path d="M12 9c-1.2-3-3-4.6-4.6-4.6a2.2 2.2 0 0 0 0 4.6Z"/><path d="M12 9c1.2-3 3-4.6 4.6-4.6a2.2 2.2 0 0 1 0 4.6Z"/></svg>';
-  var ICON_SNOWFLAKE = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 2.5v19M4.7 7.1l14.6 9.8M19.3 7.1L4.7 16.9"/></svg>';
-  var ICON_HEART = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 20.2c-.3 0-.6-.1-.8-.3l-6.8-6.2C2.3 11.8 2 9.9 3 8.3c1.3-2 4.2-2.4 6-.8l3 2.7 3-2.7c1.8-1.6 4.7-1.2 6 .8 1 1.6.7 3.5-1.4 5.4l-6.8 6.2c-.2.2-.5.3-.8.3Z"/></svg>';
-  var ICON_CALENDAR = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4M16 3v4"/></svg>';
-  var ICON_SUN = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/></svg>';
-  var ICON_BRIEFCASE = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.7" y="7.5" width="18.6" height="12.3" rx="2"/><path d="M8 7.5V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.5"/><path d="M2.7 12.8h18.6"/></svg>';
-  var ICON_MOON = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>';
-  var ICON_SPARKLE = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2-5.2-1.8 5.2-1.8Z"/><path d="M19 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8Z"/></svg>';
-  var ICON_FLOWER = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><circle cx="12" cy="12" r="2.3"/><path d="M12 9.7a2.6 2.6 0 1 1 0-5.2 2.6 2.6 0 0 1 0 5.2ZM12 19.5a2.6 2.6 0 1 1 0-5.2 2.6 2.6 0 0 1 0 5.2ZM14.3 12a2.6 2.6 0 1 1 5.2 0 2.6 2.6 0 0 1-5.2 0ZM4.5 12a2.6 2.6 0 1 1 5.2 0 2.6 2.6 0 0 1-5.2 0Z"/></svg>';
-  var ICON_LEAF = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 19c8-1 14-6 15-15C10 5 5 11 4 19Z"/><path d="M6 18c3-4 6-7 12-12"/></svg>';
+  var AUTO_ADVANCE_DELAY = 220;
 
   var GELEGENHEID_OPTIONS = [
-    {v:"verjaardag", l:"Verjaardag", icon:ICON_GIFT},
-    {v:"kerst", l:"Kerst / Sinterklaas", icon:ICON_SNOWFLAKE},
-    {v:"valentijn", l:"Valentijn", icon:ICON_HEART},
-    {v:"jubileum", l:"Jubileum", icon:ICON_SPARKLE},
-    {v:"elke gelegenheid", l:"Geen speciale gelegenheid", icon:ICON_CALENDAR}
+    {v:"verjaardag", l:"Verjaardag"},
+    {v:"kerst", l:"Kerst / Sinterklaas"},
+    {v:"valentijn", l:"Valentijn"},
+    {v:"jubileum", l:"Jubileum"},
+    {v:"elke gelegenheid", l:"Geen speciale gelegenheid"}
   ];
   var MOMENT_OPTIONS = [
-    {v:"dagelijks", l:"Dagelijks", icon:ICON_SUN},
-    {v:"kantoor", l:"Op werk / kantoor", icon:ICON_BRIEFCASE},
-    {v:"avond", l:"'s Avonds", icon:ICON_MOON},
-    {v:"uitgaan", l:"Uitgaan", icon:ICON_SPARKLE}
+    {v:"dagelijks", l:"Dagelijks"},
+    {v:"kantoor", l:"Op werk / kantoor"},
+    {v:"avond", l:"'s Avonds"},
+    {v:"uitgaan", l:"Uitgaan"}
   ];
   var SEIZOEN_OPTIONS = [
-    {v:"lente", l:"Lente", icon:ICON_FLOWER},{v:"zomer", l:"Zomer", icon:ICON_SUN},
-    {v:"herfst", l:"Herfst", icon:ICON_LEAF},{v:"winter", l:"Winter", icon:ICON_SNOWFLAKE}
+    {v:"lente", l:"Lente"},{v:"zomer", l:"Zomer"},
+    {v:"herfst", l:"Herfst"},{v:"winter", l:"Winter"}
   ];
   var BUDGET_OPTIONS = [
     {v:"€", p:"€", l:"Tot €40"},{v:"€€", p:"€€", l:"€40 tot €80"},
@@ -85,68 +75,73 @@
   }
 
   function renderShell(inner){
+    var canBack = state.step > 0;
     root.innerHTML =
       '<div class="wizard-panel">' +
+      '<div class="wizard-top-row">' +
+      (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '<span></span>') +
       '<div class="wizard-step-label">Stap ' + Math.min(state.step+1, STEPS.length) + ' van ' + STEPS.length + '</div>' +
+      '</div>' +
       '<div class="progress-track">' + progressSegs() + '</div>' +
       '<div id="wizardInner"></div>' +
       '</div>';
     document.getElementById("wizardInner").innerHTML = inner;
+    if (canBack) {
+      document.getElementById("wizardBack").onclick = function(){ state.step = Math.max(0, state.step-1); render(); };
+    }
   }
 
-  function nav(canBack, canNext, nextLabel, onNext, skip){
+  function goNext(){ state.step++; render(); }
+
+  function navForward(canNext, nextLabel, onNext, skip){
     var bar = document.createElement("div");
     bar.className = "wizard-nav";
-    var back = document.createElement("button");
-    back.className = "btn btn-outline";
-    back.textContent = "Vorige";
-    back.disabled = !canBack;
-    back.onclick = function(){ state.step = Math.max(0, state.step-1); render(); };
-    var right = document.createElement("div");
-    right.style.display = "flex"; right.style.gap = "10px";
     if (skip) {
       var skipBtn = document.createElement("button");
       skipBtn.className = "btn btn-outline";
       skipBtn.textContent = "Sla over";
       skipBtn.onclick = skip;
-      right.appendChild(skipBtn);
+      bar.appendChild(skipBtn);
     }
     var next = document.createElement("button");
     next.className = "btn btn-primary";
     next.textContent = nextLabel || "Volgende";
     next.disabled = !canNext;
     next.onclick = onNext;
-    right.appendChild(next);
-    bar.appendChild(back); bar.appendChild(right);
+    bar.appendChild(next);
     document.getElementById("wizardInner").appendChild(bar);
   }
 
-  function optionCard(label, iconSvg, selected, onClick, multi){
+  function optionCard(label, selected, onClick, multi){
     var d = document.createElement("div");
     d.className = "option-card" + (selected ? " selected" : "") + (multi ? " multi" : "");
-    d.innerHTML = (iconSvg||"") + "<div>" + label + "</div>";
+    d.innerHTML = "<div>" + label + "</div>";
     d.onclick = onClick;
     return d;
   }
-
-  var USER_ICON = '<svg class="oi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c1.4-3.8 4.2-5.6 7.5-5.6s6.1 1.8 7.5 5.6" stroke-linecap="round"/></svg>';
 
   function renderStepGeslacht(){
     renderShell('<span class="wizard-question">Voor wie zoek je een parfum?</span><p class="wizard-hint">Dit bepaalt meteen welke geuren we je laten zien.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
     [["heren","Voor een man"],["dames","Voor een vrouw"],["unisex","Unisex / geen voorkeur"]].forEach(function(o){
-      opts.appendChild(optionCard(o[1], USER_ICON, state.geslacht===o[0], function(){ state.geslacht = o[0]; render(); }));
+      opts.appendChild(optionCard(o[1], state.geslacht===o[0], function(){
+        state.geslacht = o[0];
+        renderStepGeslacht();
+        setTimeout(goNext, AUTO_ADVANCE_DELAY);
+      }));
     });
-    nav(false, !!state.geslacht, "Volgende", function(){ state.step++; render(); });
   }
 
   function renderStepGelegenheid(){
     renderShell('<span class="wizard-question">Wat is de gelegenheid?</span><p class="wizard-hint">Kies wat het dichtst in de buurt komt.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
     GELEGENHEID_OPTIONS.forEach(function(o){
-      opts.appendChild(optionCard(o.l, o.icon, state.gelegenheid===o.v, function(){ state.gelegenheid = o.v; render(); }));
+      opts.appendChild(optionCard(o.l, state.gelegenheid===o.v, function(){
+        state.gelegenheid = o.v;
+        renderStepGelegenheid();
+        setTimeout(goNext, AUTO_ADVANCE_DELAY);
+      }));
     });
-    nav(true, !!state.gelegenheid, "Volgende", function(){ state.step++; render(); });
   }
 
   function renderStepBekend(){
@@ -183,6 +178,7 @@
       input.value = p.naam;
       closeList();
       showFeedback();
+      setTimeout(goNext, 320);
     }
 
     function renderSuggestions(){
@@ -207,7 +203,7 @@
     input.onblur = function(){ setTimeout(closeList, 150); };
     showFeedback();
 
-    nav(true, true, "Volgende", function(){ state.step++; render(); }, function(){ state.bekendeGeur=""; state.step++; render(); });
+    navForward(true, "Volgende", goNext, function(){ state.bekendeGeur=""; goNext(); });
   }
 
   function renderStepPersoonlijkheid(){
@@ -215,14 +211,21 @@
     var opts = document.getElementById("opts");
     PERSONALITY_OPTIONS.forEach(function(v){
       var selected = state.persoonlijkheid.indexOf(v) > -1;
-      opts.appendChild(optionCard(v.charAt(0).toUpperCase()+v.slice(1), "", selected, function(){
+      opts.appendChild(optionCard(v.charAt(0).toUpperCase()+v.slice(1), selected, function(){
         var i = state.persoonlijkheid.indexOf(v);
-        if (i>-1) state.persoonlijkheid.splice(i,1);
-        else if (state.persoonlijkheid.length < 3) state.persoonlijkheid.push(v);
-        render();
+        if (i>-1) { state.persoonlijkheid.splice(i,1); render(); return; }
+        if (state.persoonlijkheid.length < 3) state.persoonlijkheid.push(v);
+        if (state.persoonlijkheid.length === 3) {
+          renderStepPersoonlijkheid();
+          setTimeout(goNext, AUTO_ADVANCE_DELAY);
+        } else {
+          render();
+        }
       }, true));
     });
-    nav(true, state.persoonlijkheid.length>0, "Volgende", function(){ state.step++; render(); });
+    if (state.persoonlijkheid.length < 3) {
+      navForward(state.persoonlijkheid.length>0, "Volgende", goNext);
+    }
   }
 
   function renderStepMoment(){
@@ -230,13 +233,13 @@
     var opts = document.getElementById("opts");
     MOMENT_OPTIONS.forEach(function(o){
       var selected = state.moment.indexOf(o.v) > -1;
-      opts.appendChild(optionCard(o.l, o.icon, selected, function(){
+      opts.appendChild(optionCard(o.l, selected, function(){
         var i = state.moment.indexOf(o.v);
         if (i>-1) state.moment.splice(i,1); else state.moment.push(o.v);
         render();
       }, true));
     });
-    nav(true, true, "Volgende", function(){ state.step++; render(); }, function(){ state.moment=[]; state.step++; render(); });
+    navForward(true, "Volgende", goNext, function(){ state.moment=[]; goNext(); });
   }
 
   function renderStepBudget(){
@@ -244,9 +247,12 @@
     var opts = document.getElementById("opts");
     BUDGET_OPTIONS.forEach(function(o){
       var priceHtml = '<span class="price">' + o.p + '</span>';
-      opts.appendChild(optionCard(priceHtml + o.l, "", state.budget===o.v, function(){ state.budget = o.v; render(); }));
+      opts.appendChild(optionCard(priceHtml + o.l, state.budget===o.v, function(){
+        state.budget = o.v;
+        renderStepBudget();
+        setTimeout(goNext, AUTO_ADVANCE_DELAY);
+      }));
     });
-    nav(true, !!state.budget, "Volgende", function(){ state.step++; render(); });
   }
 
   function renderStepSeizoen(){
@@ -254,13 +260,13 @@
     var opts = document.getElementById("opts");
     SEIZOEN_OPTIONS.forEach(function(o){
       var selected = state.seizoen.indexOf(o.v) > -1;
-      opts.appendChild(optionCard(o.l, o.icon, selected, function(){
+      opts.appendChild(optionCard(o.l, selected, function(){
         var i = state.seizoen.indexOf(o.v);
         if (i>-1) state.seizoen.splice(i,1); else state.seizoen.push(o.v);
         render();
       }, true));
     });
-    nav(true, true, "Bekijk mijn advies", function(){ showResults(); }, function(){ state.seizoen=[]; showResults(); });
+    navForward(true, "Bekijk mijn advies", function(){ showResults(); }, function(){ state.seizoen=[]; showResults(); });
   }
 
   function scoreItem(item, ref){
