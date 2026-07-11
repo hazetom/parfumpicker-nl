@@ -255,6 +255,11 @@ p{margin:0 0 1em}
 .ad-unit-leaderboard{width:728px;height:90px}
 @media(max-width:480px){.ad-unit-leaderboard{width:320px;height:100px}}
 
+.share-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:18px;margin-top:8px;background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius)}
+.share-label{font-size:13px;font-weight:700;color:var(--text-muted);margin-right:2px}
+.share-btn{border:1px solid var(--border);background:#fff;color:var(--text);font-family:inherit;font-size:13.5px;font-weight:700;padding:9px 16px;border-radius:999px;cursor:pointer;text-decoration:none;transition:border-color .15s ease,color .15s ease}
+.share-btn:hover{border-color:var(--accent);color:var(--accent-dark)}
+
 /* Footer trust strip + footer */
 .footer-trust{padding:36px 0;border-top:1px solid var(--border)}
 .footer-trust .grid{display:grid;gap:20px;grid-template-columns:repeat(2,1fr)}
@@ -310,3 +315,13 @@ p{margin:0 0 1em}
 
 .section{padding:48px 0}
 .bg-soft{background:var(--bg-soft)}
+
+/* Print: clean, ad-free resultaatvel voor "Bewaar als PDF" */
+@media print{
+  .site-header, .site-footer, .footer-trust, .wizard-rail, .ad-unit,
+  .share-bar, .alt-actions, #opnieuwLink, .mobile-nav-toggle{display:none!important}
+  body{background:#fff}
+  .wizard-layout{display:block}
+  .perfume-grid{grid-template-columns:repeat(2,1fr)}
+  .perfume-card{break-inside:avoid;box-shadow:none}
+}

@@ -4,6 +4,8 @@
   var PRICE_RANK = {"€":1,"€€":2,"€€€":3,"€€€€":4};
   var PERSONALITY_OPTIONS = ["gedurfd","zelfverzekerd","stoer","warm","fris","klassiek","modern","elegant","verfijnd","mysterieus","sportief","speels"];
   var AUTO_ADVANCE_DELAY = 220;
+  var MAX_SHOWN = 12;
+  var RESULTS_PER_PAGE = 4;
 
   var SILLAGE_OPTIONS = [
     {v:"subtiel", l:"Liever subtiel", match:["licht","intiem"]},
@@ -402,13 +404,80 @@
       '</article>';
   }
 
-  function showResults(){
+  function stateToParams(){
+    var sp = new URLSearchParams();
+    if (state.geslacht) sp.set("g", state.geslacht);
+    if (state.persoonlijkheid.length) sp.set("p", state.persoonlijkheid.join(","));
+    if (state.sillage) sp.set("s", state.sillage);
+    if (state.moment.length) sp.set("m", state.moment.join(","));
+    if (state.seizoen.length) sp.set("z", state.seizoen.join(","));
+    if (state.budget) sp.set("b", state.budget);
+    if (state.bekendeGeur) sp.set("r", state.bekendeGeur);
+    sp.set("n", state.shown.length);
+    return sp;
+  }
+
+  function updateUrl(){
     // pushState kan een SecurityError gooien wanneer de pagina via file:// geopend is;
     // dat mag de wizard niet blokkeren, dus vangen we het stilletjes af.
-    try { history.pushState({}, "", "?resultaat=1"); } catch (e) {}
+    try { history.pushState({}, "", "?" + stateToParams().toString()); } catch (e) {}
+  }
+
+  function paramsToState(sp){
+    var g = sp.get("g");
+    if (!g) return 0;
+    state.geslacht = g;
+    state.persoonlijkheid = sp.get("p") ? sp.get("p").split(",").filter(Boolean) : [];
+    state.sillage = sp.get("s") || null;
+    state.moment = sp.get("m") ? sp.get("m").split(",").filter(Boolean) : [];
+    state.seizoen = sp.get("z") ? sp.get("z").split(",").filter(Boolean) : [];
+    state.budget = sp.get("b") || null;
+    state.bekendeGeur = sp.get("r") || "";
+    var n = parseInt(sp.get("n"), 10);
+    return (n && n > 0) ? Math.min(n, MAX_SHOWN) : RESULTS_PER_PAGE;
+  }
+
+  function shareUrl(){
+    return location.href;
+  }
+
+  function shareText(){
+    return "Ik heb via ParfumPicker.nl parfums gevonden die bij me passen, kijk maar:";
+  }
+
+  function renderShareBar(){
+    var url = shareUrl();
+    var waHref = "https://wa.me/?text=" + encodeURIComponent(shareText() + " " + url);
+    var mailHref = "mailto:?subject=" + encodeURIComponent("Mijn ParfumPicker-advies") +
+      "&body=" + encodeURIComponent(shareText() + "\n\n" + url);
+    return '<div class="share-bar">' +
+      '<span class="share-label">Bewaren of delen:</span>' +
+      '<a class="share-btn" href="' + waHref + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<a class="share-btn" href="' + mailHref + '">E-mail</a>' +
+      '<button type="button" class="share-btn" id="copyLinkBtn">Kopieer link</button>' +
+      '<button type="button" class="share-btn" id="savePdfBtn">Bewaar als PDF</button>' +
+      '</div>';
+  }
+
+  function bindShareBar(){
+    var copyBtn = document.getElementById("copyLinkBtn");
+    copyBtn.onclick = function(){
+      var url = shareUrl();
+      var done = function(){ copyBtn.textContent = "Gekopieerd!"; setTimeout(function(){ copyBtn.textContent = "Kopieer link"; }, 1800); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(function(){ window.prompt("Kopieer deze link:", url); });
+      } else {
+        window.prompt("Kopieer deze link:", url);
+      }
+    };
+    document.getElementById("savePdfBtn").onclick = function(){ window.print(); };
+  }
+
+  function showResults(count){
     var all = rankedList();
 
     if (!all.length) {
+      try { history.pushState({}, "", "?resultaat=1"); } catch (e) {}
       root.innerHTML =
         '<div class="wizard-panel" style="max-width:640px;margin:32px auto;text-align:center">' +
         '<h2 style="font-size:22px">Geen match gevonden</h2>' +
@@ -419,16 +488,20 @@
       return;
     }
 
-    state.shown = all.slice(0, 4);
+    state.shown = all.slice(0, count || RESULTS_PER_PAGE);
+    updateUrl();
     renderResultsList(all);
   }
 
   function renderResultsList(all){
-    var shownIds = state.shown.map(function(p){ return p.id; });
     var cards = state.shown.map(function(p, i){
       var badge = i===0 ? {text:"Onze aanrader"} : null;
       return cardHtml(p, badge);
     }).join("");
+
+    var shownIds = state.shown.map(function(p){ return p.id; });
+    var remaining = all.filter(function(p){ return shownIds.indexOf(p.id) === -1; });
+    var canShowMore = remaining.length > 0 && state.shown.length < MAX_SHOWN;
 
     root.innerHTML =
       '<div class="results-summary container" style="max-width:920px;margin:0 auto">' +
@@ -439,26 +512,26 @@
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
       '</div>' +
-      '<div class="alt-actions"><button class="btn btn-outline" id="altBtn">Toon meer alternatieven</button></div>' +
-      '<div style="text-align:center;margin-bottom:30px"><a href="#" id="opnieuwLink" class="details-link">Opnieuw beginnen</a></div>';
+      (canShowMore ? '<div class="alt-actions"><button class="btn btn-outline" id="meerBtn">Toon meer opties</button></div>' : '') +
+      '<div class="container" style="max-width:920px;margin:0 auto">' + renderShareBar() + '</div>' +
+      '<div style="text-align:center;margin:20px 0 30px"><a href="#" id="opnieuwLink" class="details-link">Opnieuw beginnen</a></div>';
 
     document.getElementById("opnieuwLink").onclick = function(e){ e.preventDefault(); resetWizard(); };
+    bindShareBar();
 
-    document.getElementById("altBtn").onclick = function(){
-      var remaining = all.filter(function(p){ return shownIds.indexOf(p.id) === -1; });
-      var next;
-      if (remaining.length >= 4) {
-        next = remaining.slice(0, 4);
-      } else if (remaining.length > 0) {
-        next = remaining;
-      } else {
-        // pool uitgeput: herschud de volledige lijst zodat het nooit doodloopt
-        next = all.slice().sort(function(){ return Math.random()-0.5; }).slice(0,4);
-      }
-      state.shown = next;
-      renderResultsList(all);
-      window.scrollTo({top: document.getElementById("resultsGrid").offsetTop - 100, behavior:"smooth"});
-    };
+    if (canShowMore) {
+      document.getElementById("meerBtn").onclick = function(){
+        var prevCount = state.shown.length;
+        var room = MAX_SHOWN - state.shown.length;
+        var add = remaining.slice(0, Math.min(RESULTS_PER_PAGE, room));
+        state.shown = state.shown.concat(add);
+        updateUrl();
+        renderResultsList(all);
+        var grid = document.getElementById("resultsGrid");
+        var newCard = grid.children[prevCount];
+        if (newCard) newCard.scrollIntoView({behavior:"smooth", block:"center"});
+      };
+    }
   }
 
   var STEP_RENDERERS = {
@@ -492,7 +565,13 @@
   }
 
   fetchData().then(function(){
-    render();
+    var sp = new URLSearchParams(location.search);
+    var sharedCount = paramsToState(sp);
+    if (sharedCount) {
+      showResults(sharedCount);
+    } else {
+      render();
+    }
   }).catch(function(err){
     root.innerHTML = '<div class="wizard-panel" style="max-width:640px;margin:32px auto;text-align:center">' +
       '<p style="color:var(--text-muted)">' + err.message + '</p></div>';
