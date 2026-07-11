@@ -234,13 +234,18 @@
     renderShell('<span class="wizard-question">Voor wie zoek je een parfum?</span><p class="wizard-hint">Dit bepaalt meteen welke geuren we je laten zien.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
     [["heren","Voor een man"],["dames","Voor een vrouw"],["unisex","Unisex / geen voorkeur"]].forEach(function(o){
-      opts.appendChild(optionCard(o[1], state.geslacht===o[0], function(){
+      var card = optionCard(o[1], state.geslacht===o[0], function(){
+        Array.prototype.forEach.call(opts.children, function(el){ el.classList.remove("selected"); });
         state.geslacht = o[0];
-        renderStepGeslacht();
-        setTimeout(goNext, AUTO_ADVANCE_DELAY);
-      }));
+        card.classList.add("selected");
+        animateMatchRing(liveMatchCount());
+        var nextBtn = document.querySelector(".wizard-nav .btn-primary");
+        if (nextBtn) nextBtn.disabled = false;
+      });
+      opts.appendChild(card);
     });
     staggerGrid(opts);
+    navForward(!!state.geslacht, "Volgende", goNext);
   }
 
   function renderStepSillage(){
@@ -581,6 +586,33 @@
       '</article>';
   }
 
+  function heroWhyText(p){
+    var onLabels = matchChecklist(p).filter(function(c){ return c.on; }).map(function(c){ return c.label; });
+    if (!onLabels.length) return "Scoort goed op prijs en breed toepasbare kenmerken.";
+    var text = onLabels.slice(0, 3).join(", ");
+    return text.charAt(0).toUpperCase() + text.slice(1) + ".";
+  }
+
+  function heroCardHtml(p, rank, pct, isTop){
+    var shopHtml = p.affiliate_url ?
+      '<a class="shop-btn" href="' + p.affiliate_url + '" target="_blank" rel="noopener nofollow sponsored">Shop bij ICI Paris XL</a>' :
+      '<span class="shop-empty">Nog niet bij ICI Paris XL verkrijgbaar</span>';
+    return '<div class="hero-row' + (isTop ? ' rank-top' : '') + '">' +
+      '<div class="hero-rank">' + (rank < 10 ? "0" + rank : rank) + '</div>' +
+      '<div class="hero-bottle">' +
+      '<div class="hero-badge-pct"><span class="pct">' + pct + '%</span><span class="lbl">Match</span></div>' +
+      bottleVisualHtml(p) +
+      '</div>' +
+      '<div class="hero-body">' +
+      (isTop ? '<span class="hero-toplabel">Onze aanrader</span>' : '') +
+      '<h3 class="hero-name">' + p.naam + '</h3>' +
+      '<div class="hero-meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
+      '<p class="hero-why">' + heroWhyText(p) + '</p>' +
+      '<div class="hero-actions">' + shopHtml + '<a class="details-mini" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details &rarr;</a></div>' +
+      '</div>' +
+      '</div>';
+  }
+
   function runMatchScan(cb){
     var panel = document.querySelector(".wizard-panel");
     if (!panel) { cb(); return; }
@@ -725,24 +757,30 @@
   function renderResultsList(all){
     var ref = findRef();
     var topScore = all.length ? scoreItem(all[0], ref) : 0;
-    var cards = state.shown.map(function(p, i){
-      var badge = i===0 ? {text:"Onze aanrader"} : null;
-      var pct = topScore > 0 ? Math.max(45, Math.min(100, Math.round((scoreItem(p, ref)/topScore)*100))) : 60;
-      return cardHtml(p, badge, pct);
-    }).join("");
+    function pctFor(p){
+      return topScore > 0 ? Math.max(45, Math.min(100, Math.round((scoreItem(p, ref)/topScore)*100))) : 60;
+    }
+
+    var heroItems = state.shown.slice(0, 3);
+    var restItems = state.shown.slice(3);
+    var heroHtml = heroItems.map(function(p, i){ return heroCardHtml(p, i+1, pctFor(p), i===0); }).join("");
+    var restCards = restItems.map(function(p){ return cardHtml(p, null, pctFor(p)); }).join("");
 
     var shownIds = state.shown.map(function(p){ return p.id; });
     var remaining = all.filter(function(p){ return shownIds.indexOf(p.id) === -1; });
     var canShowMore = remaining.length > 0 && state.shown.length < MAX_SHOWN;
     var moreTile = canShowMore ?
       '<button type="button" class="show-more-tile" id="meerBtn"><span class="show-more-plus">+</span>Laat meer zien</button>' : '';
+    var gridHtml = (restItems.length || canShowMore) ?
+      '<div class="perfume-grid container" style="max-width:920px;margin:20px auto" id="resultsGrid">' + restCards + moreTile + '</div>' : '';
 
     root.innerHTML =
       '<div class="results-summary container" style="max-width:920px;margin:0 auto">' +
       '<h2 style="font-size:24px">Jouw persoonlijke aanbevelingen</h2>' +
       '<p class="sub" style="margin-bottom:0">Gebaseerd op jouw antwoorden &middot; 100% gratis &middot; We sturen op match, niet op populariteit.</p>' +
       '</div>' +
-      '<div class="perfume-grid container" style="max-width:920px;margin:20px auto" id="resultsGrid">' + cards + moreTile + '</div>' +
+      '<div class="hero-list container" style="max-width:920px;margin:20px auto 0" id="heroList">' + heroHtml + '</div>' +
+      gridHtml +
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
       '</div>' +
@@ -751,25 +789,30 @@
 
     document.getElementById("opnieuwLink").onclick = function(){ resetWizard(); };
     bindShareBar();
-    staggerGrid(document.getElementById("resultsGrid"));
-    document.getElementById("resultsGrid").addEventListener("click", function(e){
-      var btn = e.target.closest(".why-toggle");
-      if (!btn) return;
-      btn.classList.toggle("open");
-      var list = btn.nextElementSibling;
-      if (list) list.classList.toggle("open");
-    });
+    staggerGrid(document.getElementById("heroList"));
+
+    var grid = document.getElementById("resultsGrid");
+    if (grid) {
+      staggerGrid(grid);
+      grid.addEventListener("click", function(e){
+        var btn = e.target.closest(".why-toggle");
+        if (!btn) return;
+        btn.classList.toggle("open");
+        var list = btn.nextElementSibling;
+        if (list) list.classList.toggle("open");
+      });
+    }
 
     if (canShowMore) {
       document.getElementById("meerBtn").onclick = function(){
-        var prevCount = state.shown.length;
+        var prevCount = state.shown.length - 3;
         var room = MAX_SHOWN - state.shown.length;
         var add = remaining.slice(0, Math.min(RESULTS_PER_PAGE, room));
         state.shown = state.shown.concat(add);
         updateUrl();
         renderResultsList(all);
-        var grid = document.getElementById("resultsGrid");
-        var newCard = grid.children[prevCount];
+        var newGrid = document.getElementById("resultsGrid");
+        var newCard = newGrid && newGrid.children[prevCount];
         if (newCard) newCard.scrollIntoView({behavior:"smooth", block:"center"});
       };
     }
