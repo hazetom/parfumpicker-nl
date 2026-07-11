@@ -229,7 +229,7 @@
 
     function showFeedback(){
       var q = state.bekendeGeur.trim();
-      var exact = q && DATA.find(function(p){ return p.naam.toLowerCase() === q.toLowerCase(); });
+      var exact = q && autocompletePool().find(function(p){ return p.naam.toLowerCase() === q.toLowerCase(); });
       if (exact) {
         feedback.innerHTML = '<span class="feedback-ok">&#10003; Herkend: ' + exact.naam + ', we wegen dit mee in je advies.</span>';
       } else if (q.length > 1) {
@@ -259,7 +259,7 @@
       list.classList.add("open");
       Array.prototype.forEach.call(list.querySelectorAll(".autocomplete-item"), function(btn){
         btn.onclick = function(){
-          var match = DATA.find(function(p){ return p.id === btn.getAttribute("data-id"); });
+          var match = autocompletePool().find(function(p){ return p.id === btn.getAttribute("data-id"); });
           if (match) selectMatch(match);
         };
       });
@@ -372,12 +372,13 @@
     return score;
   }
 
-  function findMatches(query, limit){
+  function findMatches(query, limit, pool){
     var q = (query||"").trim().toLowerCase();
     if (!q) return [];
+    var src = pool || autocompletePool();
     var out = [];
-    for (var i = 0; i < DATA.length && out.length < limit; i++) {
-      var p = DATA[i];
+    for (var i = 0; i < src.length && out.length < limit; i++) {
+      var p = src[i];
       if (p.naam.toLowerCase().indexOf(q) > -1 || (p.merk+" "+p.naam).toLowerCase().indexOf(q) > -1) out.push(p);
     }
     return out;
@@ -390,6 +391,13 @@
   function genderPool(){
     if (!state.geslacht || state.geslacht === "unisex") return DATA;
     return DATA.filter(function(p){ return p.geslacht === state.geslacht; });
+  }
+
+  // Voor "ken je al een geur": mag ook unisex tonen naast het gekozen geslacht
+  // (bij heren dus heren + unisex, niet alleen strikt heren).
+  function autocompletePool(){
+    if (!state.geslacht || state.geslacht === "unisex") return DATA;
+    return DATA.filter(function(p){ return p.geslacht === state.geslacht || p.geslacht === "unisex"; });
   }
 
   function maxPossibleScore(){
