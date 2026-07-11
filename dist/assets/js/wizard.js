@@ -148,6 +148,8 @@
     if (radar1) radar1.classList.add("go");
     if (radar2) radar2.classList.add("go");
     if (gridEl) gridEl.classList.add("show");
+    var panelEl = document.querySelector(".wizard-panel");
+    if (panelEl) panelEl.classList.add("panel-calculating");
     requestAnimationFrame(function(){
       if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
     });
@@ -167,6 +169,7 @@
         if (radar1) radar1.classList.remove("go");
         if (radar2) radar2.classList.remove("go");
         if (gridEl) gridEl.classList.remove("show");
+        if (panelEl) panelEl.classList.remove("panel-calculating");
       }
     }
     requestAnimationFrame(step);
@@ -588,15 +591,16 @@
 
   function heroWhyText(p){
     var onLabels = matchChecklist(p).filter(function(c){ return c.on; }).map(function(c){ return c.label; });
-    if (!onLabels.length) return "Scoort goed op prijs en breed toepasbare kenmerken.";
-    var text = onLabels.slice(0, 3).join(", ");
-    return text.charAt(0).toUpperCase() + text.slice(1) + ".";
+    var reason = onLabels.length ?
+      "Dit " + onLabels.slice(0, 3).join(", ") + "." :
+      "Dit scoort goed op prijs en breed toepasbare kenmerken.";
+    return p.beschrijving + " " + reason;
   }
 
   function heroCardHtml(p, rank, pct, isTop){
     var shopHtml = p.affiliate_url ?
       '<a class="shop-btn" href="' + p.affiliate_url + '" target="_blank" rel="noopener nofollow sponsored">Shop bij ICI Paris XL</a>' :
-      '<span class="shop-empty">Nog niet bij ICI Paris XL verkrijgbaar</span>';
+      '<button type="button" class="shop-btn shop-btn-empty" disabled>Geen prijs gevonden</button>';
     return '<div class="hero-row' + (isTop ? ' rank-top' : '') + '">' +
       '<div class="hero-rank">' + (rank < 10 ? "0" + rank : rank) + '</div>' +
       '<div class="hero-bottle-wrap">' +
@@ -772,14 +776,20 @@
     var moreTile = canShowMore ?
       '<button type="button" class="show-more-tile" id="meerBtn"><span class="show-more-plus">+</span>Laat meer zien</button>' : '';
     var gridHtml = (restItems.length || canShowMore) ?
-      '<div class="perfume-grid container" style="max-width:920px;margin:20px auto" id="resultsGrid">' + restCards + moreTile + '</div>' : '';
+      '<div class="more-section container" style="max-width:920px;margin:20px auto">' +
+      '<h3 class="results-section-heading">Meer aanbevelingen</h3>' +
+      '<div class="perfume-grid" id="resultsGrid">' + restCards + moreTile + '</div>' +
+      '</div>' : '';
 
     root.innerHTML =
       '<div class="results-summary container" style="max-width:920px;margin:0 auto">' +
       '<h2 style="font-size:24px">Jouw persoonlijke aanbevelingen</h2>' +
       '<p class="sub" style="margin-bottom:0">Gebaseerd op jouw antwoorden &middot; 100% gratis &middot; We sturen op match, niet op populariteit.</p>' +
       '</div>' +
-      '<div class="hero-list container" style="max-width:920px;margin:20px auto 0" id="heroList">' + heroHtml + '</div>' +
+      '<div class="hero-list container" style="max-width:920px;margin:20px auto 0" id="heroList">' +
+      '<h3 class="results-section-heading">Jouw gepersonaliseerde Top 3</h3>' +
+      '<div class="hero-rows-wrap">' + heroHtml + '</div>' +
+      '</div>' +
       gridHtml +
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
@@ -789,7 +799,7 @@
 
     document.getElementById("opnieuwLink").onclick = function(){ resetWizard(); };
     bindShareBar();
-    staggerGrid(document.getElementById("heroList"));
+    staggerGrid(document.querySelector("#heroList .hero-rows-wrap"));
 
     var grid = document.getElementById("resultsGrid");
     if (grid) {
