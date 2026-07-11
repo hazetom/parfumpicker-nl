@@ -297,26 +297,36 @@
   }
 
   function renderStepPersoonlijkheid(){
-    renderShell('<span class="wizard-question">Hoe zou je de persoonlijkheid omschrijven?</span><p class="wizard-hint">Kies 2 tot 3 kenmerken.</p><div class="option-grid" id="opts"></div>');
+    renderShell('<span class="wizard-question">Hoe zou je de persoonlijkheid omschrijven?</span><p class="wizard-hint">Kies tot 3 kenmerken (optioneel).</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
+
+    function refreshCap(){
+      var atCap = state.persoonlijkheid.length >= 3;
+      Array.prototype.forEach.call(opts.children, function(el){
+        if (!el.classList.contains("selected")) el.classList.toggle("at-cap", atCap);
+      });
+    }
+
     PERSONALITY_OPTIONS.forEach(function(v){
       var selected = state.persoonlijkheid.indexOf(v) > -1;
-      opts.appendChild(optionCard(v.charAt(0).toUpperCase()+v.slice(1), selected, function(){
+      var card = optionCard(v.charAt(0).toUpperCase()+v.slice(1), selected, function(){
         var i = state.persoonlijkheid.indexOf(v);
-        if (i>-1) { state.persoonlijkheid.splice(i,1); render(); return; }
-        if (state.persoonlijkheid.length < 3) state.persoonlijkheid.push(v);
-        if (state.persoonlijkheid.length === 3) {
-          renderStepPersoonlijkheid();
-          setTimeout(goNext, AUTO_ADVANCE_DELAY);
+        if (i > -1) {
+          state.persoonlijkheid.splice(i, 1);
+          card.classList.remove("selected");
         } else {
-          render();
+          if (state.persoonlijkheid.length >= 3) return;
+          state.persoonlijkheid.push(v);
+          card.classList.add("selected");
         }
-      }, true));
+        refreshCap();
+        animateMatchRing(liveMatchCount());
+      }, true);
+      opts.appendChild(card);
     });
     staggerGrid(opts);
-    if (state.persoonlijkheid.length < 3) {
-      navForward(state.persoonlijkheid.length>0, "Volgende", goNext);
-    }
+    refreshCap();
+    navForward(true, "Volgende", goNext);
   }
 
   function renderStepBudget(){
@@ -344,21 +354,25 @@
     var optsMoment = document.getElementById("optsMoment");
     MOMENT_OPTIONS.forEach(function(o){
       var selected = state.moment.indexOf(o.v) > -1;
-      optsMoment.appendChild(optionCard(o.l, selected, function(){
+      var card = optionCard(o.l, selected, function(){
         var i = state.moment.indexOf(o.v);
-        if (i>-1) state.moment.splice(i,1); else state.moment.push(o.v);
-        render();
-      }, true));
+        if (i>-1) { state.moment.splice(i,1); card.classList.remove("selected"); }
+        else { state.moment.push(o.v); card.classList.add("selected"); }
+        animateMatchRing(liveMatchCount());
+      }, true);
+      optsMoment.appendChild(card);
     });
     staggerGrid(optsMoment);
     var optsSeizoen = document.getElementById("optsSeizoen");
     SEIZOEN_OPTIONS.forEach(function(o){
       var selected = state.seizoen.indexOf(o.v) > -1;
-      optsSeizoen.appendChild(optionCard(o.l, selected, function(){
+      var card = optionCard(o.l, selected, function(){
         var i = state.seizoen.indexOf(o.v);
-        if (i>-1) state.seizoen.splice(i,1); else state.seizoen.push(o.v);
-        render();
-      }, true));
+        if (i>-1) { state.seizoen.splice(i,1); card.classList.remove("selected"); }
+        else { state.seizoen.push(o.v); card.classList.add("selected"); }
+        animateMatchRing(liveMatchCount());
+      }, true);
+      optsSeizoen.appendChild(card);
     });
     staggerGrid(optsSeizoen);
     navForward(true, "Bekijk mijn advies", function(){ runMatchScan(showResults); }, function(){ state.moment=[]; state.seizoen=[]; runMatchScan(showResults); });
@@ -648,17 +662,18 @@
     var shownIds = state.shown.map(function(p){ return p.id; });
     var remaining = all.filter(function(p){ return shownIds.indexOf(p.id) === -1; });
     var canShowMore = remaining.length > 0 && state.shown.length < MAX_SHOWN;
+    var moreTile = canShowMore ?
+      '<button type="button" class="show-more-tile" id="meerBtn"><span class="show-more-plus">+</span>Laat meer zien</button>' : '';
 
     root.innerHTML =
       '<div class="results-summary container" style="max-width:920px;margin:0 auto">' +
       '<h2 style="font-size:24px">Jouw persoonlijke aanbevelingen</h2>' +
       '<p class="sub" style="margin-bottom:0">Gebaseerd op jouw antwoorden &middot; 100% gratis &middot; We sturen op match, niet op populariteit.</p>' +
       '</div>' +
-      '<div class="perfume-grid container" style="max-width:920px;margin:20px auto" id="resultsGrid">' + cards + '</div>' +
+      '<div class="perfume-grid container" style="max-width:920px;margin:20px auto" id="resultsGrid">' + cards + moreTile + '</div>' +
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
       '</div>' +
-      (canShowMore ? '<div class="alt-actions"><button class="btn btn-outline" id="meerBtn">Toon meer opties</button></div>' : '') +
       '<div class="container" style="max-width:920px;margin:0 auto">' + renderShareBar() + '</div>' +
       '<div style="text-align:center;margin:20px 0 30px"><a href="#" id="opnieuwLink" class="details-link">Opnieuw beginnen</a></div>';
 
