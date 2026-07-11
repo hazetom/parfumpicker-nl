@@ -66,13 +66,69 @@
     return t.content.firstElementChild;
   }
 
-  function progressSegs(){
-    var segs = "";
-    for (var i = 0; i < STEPS.length; i++) {
-      var cls = i < state.step ? "done" : (i === state.step ? "current" : "");
-      segs += '<div class="progress-seg ' + cls + '"><span></span></div>';
+  function describeArc(cx, cy, r, a0, a1){
+    function toXY(a){ var rad = (a-90) * Math.PI/180; return {x: cx + r*Math.cos(rad), y: cy + r*Math.sin(rad)}; }
+    var p0 = toXY(a0), p1 = toXY(a1);
+    var large = (a1-a0) > 180 ? 1 : 0;
+    return "M " + p0.x.toFixed(2) + " " + p0.y.toFixed(2) + " A " + r + " " + r + " 0 " + large + " 1 " + p1.x.toFixed(2) + " " + p1.y.toFixed(2);
+  }
+
+  function matchRingArcs(){
+    var n = STEPS.length, gap = 8, cx = 48, cy = 48, r = 38;
+    var seg = 360/n;
+    var html = "";
+    for (var i = 0; i < n; i++) {
+      var a0 = i*seg + gap/2, a1 = (i+1)*seg - gap/2;
+      var pending = i > state.step;
+      var stroke = pending ? "var(--border)" : "var(--accent)";
+      html += '<path d="' + describeArc(cx, cy, r, a0, a1) + '" fill="none" stroke="' + stroke + '" stroke-width="7" stroke-linecap="round"' +
+        (pending ? ' opacity="0.6" stroke-dasharray="3 5"' : '') + '/>';
     }
-    return segs;
+    return html;
+  }
+
+  function matchRingHtml(){
+    var n = liveMatchCount();
+    return '<div class="match-ring-row">' +
+      '<div class="match-ring-wrap"><svg class="match-ring-svg" viewBox="0 0 96 96">' + matchRingArcs() + '</svg>' +
+      '<div class="match-ring-center"><span class="match-ring-count">' + n + '</span><small>passen nu</small></div></div>' +
+      '<div class="match-ring-copy"><h4>Jouw profiel</h4><p>Live bijgewerkt op basis van je antwoorden.</p></div>' +
+      '</div>' +
+      '<div class="wizard-insight" id="wizardInsight"></div>';
+  }
+
+  var insightTimer = null;
+  function showInsight(text){
+    var host = document.getElementById("wizardInsight");
+    if (!host || !text) return;
+    host.innerHTML = '<span>' + text + '</span>';
+    var span = host.querySelector("span");
+    requestAnimationFrame(function(){ span.classList.add("show"); });
+    clearTimeout(insightTimer);
+    insightTimer = setTimeout(function(){ span.classList.remove("show"); }, 2600);
+  }
+
+  function insightForGeslacht(g){
+    var pool = g === "unisex" ? DATA : DATA.filter(function(p){ return p.geslacht === g; });
+    var label = g === "heren" ? "herenassortiment" : (g === "dames" ? "damesassortiment" : "volledige assortiment");
+    return "We zoeken nu in het " + label + " &middot; " + pool.length + " parfums.";
+  }
+
+  function insightForPersoonlijkheid(tags){
+    if (!tags.length) return "";
+    var pool = DATA.filter(function(p){ return tags.some(function(t){ return p.persoonlijkheid.indexOf(t) > -1; }); });
+    var counts = {};
+    pool.forEach(function(p){ p.accords.forEach(function(a){ counts[a] = (counts[a]||0) + 1; }); });
+    var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0, 2);
+    if (!top.length) return "";
+    return tags.join(", ") + " &rarr; we richten ons op " + top.join(" en ") + ".";
+  }
+
+  function insightForSillage(v){
+    var bucket = SILLAGE_OPTIONS.filter(function(o){ return o.v === v; })[0];
+    if (!bucket || !bucket.match) return "Geen voorkeur &mdash; we wegen sillage niet mee.";
+    var pool = genderPool().filter(function(p){ return bucket.match.indexOf(p.sillage) > -1; });
+    return bucket.l + " &rarr; " + pool.length + " parfums met deze sterkte.";
   }
 
   function renderShell(inner){
@@ -81,9 +137,9 @@
       '<div class="wizard-panel">' +
       '<div class="wizard-top-row">' +
       (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '<span></span>') +
-      '<div class="wizard-step-label">Stap ' + Math.min(state.step+1, STEPS.length) + ' van ' + STEPS.length + '</div>' +
+      '<div class="wizard-step-label">Stap ' + Math.min(state.step+1, STEPS.length) + ' &middot; ' + STEPS.length + '</div>' +
       '</div>' +
-      '<div class="progress-track">' + progressSegs() + '</div>' +
+      matchRingHtml() +
       '<div id="wizardInner"></div>' +
       '</div>';
     document.getElementById("wizardInner").innerHTML = inner;
@@ -121,6 +177,13 @@
     return d;
   }
 
+  function staggerGrid(container){
+    if (!container) return;
+    Array.prototype.forEach.call(container.children, function(el, i){
+      el.style.animationDelay = (i * 35) + "ms";
+    });
+  }
+
   function renderStepGeslacht(){
     renderShell('<span class="wizard-question">Voor wie zoek je een parfum?</span><p class="wizard-hint">Dit bepaalt meteen welke geuren we je laten zien.</p><div class="option-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
@@ -128,9 +191,11 @@
       opts.appendChild(optionCard(o[1], state.geslacht===o[0], function(){
         state.geslacht = o[0];
         renderStepGeslacht();
+        showInsight(insightForGeslacht(o[0]));
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
+    staggerGrid(opts);
   }
 
   function renderStepSillage(){
@@ -140,9 +205,11 @@
       opts.appendChild(optionCard(o.l, state.sillage===o.v, function(){
         state.sillage = o.v;
         renderStepSillage();
+        showInsight(insightForSillage(o.v));
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
+    staggerGrid(opts);
   }
 
   function renderStepBekend(){
@@ -218,12 +285,15 @@
         if (state.persoonlijkheid.length < 3) state.persoonlijkheid.push(v);
         if (state.persoonlijkheid.length === 3) {
           renderStepPersoonlijkheid();
+          showInsight(insightForPersoonlijkheid(state.persoonlijkheid));
           setTimeout(goNext, AUTO_ADVANCE_DELAY);
         } else {
           render();
+          showInsight(insightForPersoonlijkheid(state.persoonlijkheid));
         }
       }, true));
     });
+    staggerGrid(opts);
     if (state.persoonlijkheid.length < 3) {
       navForward(state.persoonlijkheid.length>0, "Volgende", goNext);
     }
@@ -240,6 +310,7 @@
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
+    staggerGrid(opts);
   }
 
   function renderStepVoorkeur(){
@@ -259,6 +330,7 @@
         render();
       }, true));
     });
+    staggerGrid(optsMoment);
     var optsSeizoen = document.getElementById("optsSeizoen");
     SEIZOEN_OPTIONS.forEach(function(o){
       var selected = state.seizoen.indexOf(o.v) > -1;
@@ -268,7 +340,8 @@
         render();
       }, true));
     });
-    navForward(true, "Bekijk mijn advies", function(){ showResults(); }, function(){ state.moment=[]; state.seizoen=[]; showResults(); });
+    staggerGrid(optsSeizoen);
+    navForward(true, "Bekijk mijn advies", function(){ runMatchScan(showResults); }, function(){ state.moment=[]; state.seizoen=[]; runMatchScan(showResults); });
   }
 
   function sillageBucket(){
@@ -315,8 +388,34 @@
   }
 
   function genderPool(){
-    if (state.geslacht === "unisex") return DATA;
+    if (!state.geslacht || state.geslacht === "unisex") return DATA;
     return DATA.filter(function(p){ return p.geslacht === state.geslacht; });
+  }
+
+  function maxPossibleScore(){
+    var max = 0;
+    if (state.persoonlijkheid.length) max += state.persoonlijkheid.length * 2;
+    if (state.sillage && state.sillage !== "geen_voorkeur") max += 2;
+    if (state.moment.length) max += state.moment.length;
+    if (state.seizoen.length) max += state.seizoen.length;
+    return max;
+  }
+
+  function liveMatchCount(){
+    var pool = genderPool();
+    if (state.budget) {
+      var budgetRank = PRICE_RANK[state.budget] || 4;
+      pool = pool.filter(function(p){ return PRICE_RANK[p.prijsklasse] <= budgetRank; });
+    }
+    var max = maxPossibleScore();
+    if (max <= 0) return pool.length;
+    var ref = findRef();
+    var threshold = max * 0.55;
+    var count = 0;
+    for (var i = 0; i < pool.length; i++) {
+      if (scoreItem(pool[i], ref) >= threshold) count++;
+    }
+    return Math.max(count, Math.min(6, pool.length));
   }
 
   function rankedList(){
@@ -380,28 +479,44 @@
     return bottleSvg(p.familie_hoofd, p.id, w, h);
   }
 
-  function reasonText(p){
-    var bits = [];
-    var overlap = state.persoonlijkheid.filter(function(t){ return p.persoonlijkheid.indexOf(t)>-1; });
-    if (overlap.length) bits.push("sluit aan bij " + overlap.join(", "));
+  function matchChecklist(p){
     var bucket = sillageBucket();
-    if (bucket && bucket.match && bucket.match.indexOf(p.sillage) > -1) bits.push("heeft precies de sterkte die je zocht");
+    var overlap = state.persoonlijkheid.filter(function(t){ return p.persoonlijkheid.indexOf(t)>-1; });
     var momentOverlap = state.moment.filter(function(m){ return p.moment.indexOf(m)>-1; });
-    if (momentOverlap.length) bits.push("past bij hoe je 'm wil dragen");
-    if (seizoenOverlapCount(p) > 0) bits.push("past bij het seizoen dat je koos");
-    if (!bits.length) bits.push("scoort goed op prijs en breed toepasbare kenmerken");
-    return "Dit " + bits.slice(0,2).join(" en ") + ".";
+    return [
+      {label: overlap.length ? "sluit aan bij " + overlap.join(", ") : "past bij je persoonlijkheid", on: overlap.length > 0},
+      {label: "heeft de sterkte die je zocht", on: !!(bucket && bucket.match && bucket.match.indexOf(p.sillage) > -1)},
+      {label: "past bij hoe je 'm wil dragen", on: momentOverlap.length > 0},
+      {label: "past bij het seizoen dat je koos", on: seizoenOverlapCount(p) > 0}
+    ];
   }
 
-  function cardHtml(p, badge){
+  function cardHtml(p, badge, pct){
+    var whyItems = matchChecklist(p).map(function(c){
+      return '<li class="' + (c.on ? "match" : "") + '"><span class="tick">' + (c.on ? "&#10003;" : "") + '</span>' + c.label + '</li>';
+    }).join("");
     return '<article class="perfume-card" style="width:auto">' +
       (badge ? '<div class="badge' + (badge.grey?' grey':'') + '">' + badge.text + '</div>' : '') +
+      '<span class="match-badge' + (badge?' match-badge-best':'') + '">' + pct + '% match</span>' +
       '<div class="bottle">' + bottleVisualHtml(p) + '</div>' +
       '<h3>' + p.naam + '</h3><div class="meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
       '<p>' + p.beschrijving + '</p>' +
-      '<div class="result-explain">' + reasonText(p) + '</div>' +
+      '<button type="button" class="why-toggle">Waarom dit past<span class="why-car">&rsaquo;</span></button>' +
+      '<ul class="why-list">' + whyItems + '</ul>' +
       '<a class="details-link" style="margin-top:10px" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details →</a>' +
       '</article>';
+  }
+
+  function runMatchScan(cb){
+    var panel = document.querySelector(".wizard-panel");
+    if (!panel) { cb(); return; }
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var overlay = document.createElement("div");
+    overlay.className = "wizard-scan-overlay";
+    overlay.innerHTML = '<div class="scan-line"></div><p>We vergelijken ' + DATA.length + ' parfums met jouw profiel&hellip;</p>';
+    panel.appendChild(overlay);
+    requestAnimationFrame(function(){ overlay.classList.add("show"); });
+    setTimeout(cb, reduceMotion ? 150 : 850);
   }
 
   function stateToParams(){
@@ -494,9 +609,12 @@
   }
 
   function renderResultsList(all){
+    var ref = findRef();
+    var topScore = all.length ? scoreItem(all[0], ref) : 0;
     var cards = state.shown.map(function(p, i){
       var badge = i===0 ? {text:"Onze aanrader"} : null;
-      return cardHtml(p, badge);
+      var pct = topScore > 0 ? Math.max(45, Math.min(100, Math.round((scoreItem(p, ref)/topScore)*100))) : 60;
+      return cardHtml(p, badge, pct);
     }).join("");
 
     var shownIds = state.shown.map(function(p){ return p.id; });
@@ -518,6 +636,14 @@
 
     document.getElementById("opnieuwLink").onclick = function(e){ e.preventDefault(); resetWizard(); };
     bindShareBar();
+    staggerGrid(document.getElementById("resultsGrid"));
+    document.getElementById("resultsGrid").addEventListener("click", function(e){
+      var btn = e.target.closest(".why-toggle");
+      if (!btn) return;
+      btn.classList.toggle("open");
+      var list = btn.nextElementSibling;
+      if (list) list.classList.toggle("open");
+    });
 
     if (canShowMore) {
       document.getElementById("meerBtn").onclick = function(){
