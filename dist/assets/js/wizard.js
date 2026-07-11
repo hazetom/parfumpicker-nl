@@ -132,14 +132,17 @@
       lastShownCount = target;
       return;
     }
+    var start = lastShownCount;
+    // Commit the target immediately: if AUTO_ADVANCE_DELAY fires renderShell() again
+    // before this animation finishes (e.g. auto-advancing single-select steps), the
+    // interrupting call must see "nothing changed" instead of restarting from scratch.
+    lastShownCount = target;
     var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) {
       countEl.textContent = target;
       if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
-      lastShownCount = target;
       return;
     }
-    var start = lastShownCount;
     if (wrapEl) wrapEl.classList.add("calculating");
     if (microEl) microEl.classList.add("show");
     if (radar1) radar1.classList.add("go");
@@ -164,7 +167,6 @@
         if (radar1) radar1.classList.remove("go");
         if (radar2) radar2.classList.remove("go");
         if (gridEl) gridEl.classList.remove("show");
-        lastShownCount = target;
       }
     }
     requestAnimationFrame(step);
@@ -652,25 +654,36 @@
     return "Ik heb via ParfumPicker.nl parfums gevonden die bij me passen, kijk maar:";
   }
 
+  var SHARE_ICONS = {
+    whatsapp: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-2 2v-2.5A8.5 8.5 0 1 1 21 11.5Z"/></svg>',
+    mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    link: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15 15 9"/><path d="M11 6l1-1a4 4 0 0 1 6 6l-1 1"/><path d="M13 18l-1 1a4 4 0 0 1-6-6l1-1"/></svg>',
+    pdf: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/></svg>'
+  };
+
   function renderShareBar(){
     var url = shareUrl();
     var waHref = "https://wa.me/?text=" + encodeURIComponent(shareText() + " " + url);
     var mailHref = "mailto:?subject=" + encodeURIComponent("Mijn ParfumPicker-advies") +
       "&body=" + encodeURIComponent(shareText() + "\n\n" + url);
-    return '<div class="share-bar">' +
-      '<span class="share-label">Bewaren of delen:</span>' +
-      '<a class="share-btn" href="' + waHref + '" target="_blank" rel="noopener">WhatsApp</a>' +
-      '<a class="share-btn" href="' + mailHref + '">E-mail</a>' +
-      '<button type="button" class="share-btn" id="copyLinkBtn">Kopieer link</button>' +
-      '<button type="button" class="share-btn" id="savePdfBtn">Bewaar als PDF</button>' +
+    return '<div class="share-section">' +
+      '<h3 class="share-heading">Bewaar of deel je advies!</h3>' +
+      '<p class="share-subtext">Wil je dit advies bewaren? Sla &rsquo;m op als PDF of stuur &rsquo;m met 1 klik door via WhatsApp of de mail.</p>' +
+      '<div class="share-bar">' +
+      '<a class="share-btn" href="' + waHref + '" target="_blank" rel="noopener">' + SHARE_ICONS.whatsapp + '<span>WhatsApp</span></a>' +
+      '<a class="share-btn" href="' + mailHref + '">' + SHARE_ICONS.mail + '<span>E-mail</span></a>' +
+      '<button type="button" class="share-btn" id="copyLinkBtn">' + SHARE_ICONS.link + '<span>Kopieer link</span></button>' +
+      '<button type="button" class="share-btn" id="savePdfBtn">' + SHARE_ICONS.pdf + '<span>Bewaar als PDF</span></button>' +
+      '</div>' +
       '</div>';
   }
 
   function bindShareBar(){
     var copyBtn = document.getElementById("copyLinkBtn");
+    var copyLabel = copyBtn.querySelector("span");
     copyBtn.onclick = function(){
       var url = shareUrl();
-      var done = function(){ copyBtn.textContent = "Gekopieerd!"; setTimeout(function(){ copyBtn.textContent = "Kopieer link"; }, 1800); };
+      var done = function(){ copyLabel.textContent = "Gekopieerd!"; setTimeout(function(){ copyLabel.textContent = "Kopieer link"; }, 1800); };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(done).catch(function(){ window.prompt("Kopieer deze link:", url); });
       } else {
@@ -724,10 +737,10 @@
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
       '</div>' +
-      '<div class="container" style="max-width:920px;margin:0 auto">' + renderShareBar() + '</div>' +
-      '<div style="text-align:center;margin:20px 0 30px"><a href="#" id="opnieuwLink" class="details-link">Opnieuw beginnen</a></div>';
+      '<div class="container" style="max-width:920px;margin:20px auto 0">' + renderShareBar() + '</div>' +
+      '<div style="text-align:center;margin:28px 0 30px"><button type="button" class="btn btn-outline" id="opnieuwLink">Opnieuw beginnen</button></div>';
 
-    document.getElementById("opnieuwLink").onclick = function(e){ e.preventDefault(); resetWizard(); };
+    document.getElementById("opnieuwLink").onclick = function(){ resetWizard(); };
     bindShareBar();
     staggerGrid(document.getElementById("resultsGrid"));
     document.getElementById("resultsGrid").addEventListener("click", function(e){
