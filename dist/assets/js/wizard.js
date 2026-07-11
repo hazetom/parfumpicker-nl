@@ -457,13 +457,21 @@
     return DATA.filter(function(p){ return p.geslacht === state.geslacht || p.geslacht === "unisex"; });
   }
 
-  function maxPossibleScore(){
-    var max = 0;
-    if (state.persoonlijkheid.length) max += state.persoonlijkheid.length * 2;
-    if (state.sillage && state.sillage !== "geen_voorkeur") max += 2;
-    if (state.moment.length) max += state.moment.length;
-    if (state.seizoen.length) max += state.seizoen.length;
-    return max;
+  // Elk criterium is een keiharde AND-filter (meerdere keuzes binnen hetzelfde
+  // criterium tellen als OR: één overlap is genoeg). Dat garandeert dat het
+  // aantal alleen kan dalen of gelijk blijven naarmate je meer kiest — nooit
+  // stijgen, zoals de score-drempel van vroeger soms deed. De "bekende geur"
+  // telt hier bewust niet mee: die is een zachte hint voor de eindresultaten,
+  // geen expliciete eis, dus hij mag de teller niet laten springen.
+  function itemMatchesCriteria(item){
+    if (state.persoonlijkheid.length && !state.persoonlijkheid.some(function(t){ return item.persoonlijkheid.indexOf(t) > -1; })) return false;
+    if (state.sillage && state.sillage !== "geen_voorkeur") {
+      var bucket = sillageBucket();
+      if (bucket && bucket.match && bucket.match.indexOf(item.sillage) === -1) return false;
+    }
+    if (state.moment.length && !state.moment.some(function(m){ return item.moment.indexOf(m) > -1; })) return false;
+    if (state.seizoen.length && seizoenOverlapCount(item) === 0) return false;
+    return true;
   }
 
   function liveMatchCount(){
@@ -472,14 +480,15 @@
       var budgetRank = PRICE_RANK[state.budget] || 4;
       pool = pool.filter(function(p){ return PRICE_RANK[p.prijsklasse] <= budgetRank; });
     }
-    var max = maxPossibleScore();
-    if (max <= 0) return pool.length;
-    var ref = findRef();
-    var threshold = max * 0.55;
     var count = 0;
     for (var i = 0; i < pool.length; i++) {
-      if (scoreItem(pool[i], ref) >= threshold) count++;
+      if (itemMatchesCriteria(pool[i])) count++;
     }
+    // Vloer: de teller (en dus de belofte "zoveel passen er") mag nooit op
+    // (bijna) nul uitkomen voor een ongebruikelijke combinatie — het
+    // eindresultaat rangschikt sowieso altijd de hele pool op score, dus er
+    // worden hoe dan ook parfums getoond; deze vloer houdt dat getal daarmee
+    // in lijn i.p.v. iets te beloven dat kleiner is dan wat je straks ziet.
     return Math.max(count, Math.min(6, pool.length));
   }
 
