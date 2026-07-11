@@ -287,7 +287,7 @@ p{margin:0 0 1em}
 @media(prefers-reduced-motion:reduce){#resultsGrid .perfume-card{animation:none;opacity:1}}
 .bottle{position:relative;height:150px;border-radius:var(--radius-sm);overflow:hidden;margin:0 0 12px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center}
 .bottle svg{max-height:88%;width:auto}
-.bottle .bottle-photo{width:100%;height:100%;object-fit:cover}
+.bottle .bottle-photo{width:100%;height:100%;object-fit:contain;padding:6px}
 /* Teal colour-wash only applies over a real photo, never over the illustrations */
 .bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.20),rgba(1,25,25,.04) 60%);mix-blend-mode:multiply;pointer-events:none}
 .perfume-card h3{font-size:16px;margin-bottom:2px}
@@ -308,11 +308,13 @@ p{margin:0 0 1em}
 @media(prefers-reduced-motion:reduce){.hero-row{animation:none;opacity:1}}
 .hero-rank{flex:none;width:36px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700;font-size:20px;color:#C7CDD3;padding-top:10px;text-align:center}
 .hero-row.rank-top .hero-rank{color:var(--gold)}
-.hero-bottle{position:relative;flex:none;width:150px;height:180px;border-radius:14px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.hero-bottle svg{max-height:82%;width:auto}
-.hero-bottle .bottle-photo{width:100%;height:100%;object-fit:cover}
-.hero-bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.20),rgba(1,25,25,.04) 60%);mix-blend-mode:multiply;pointer-events:none}
-.hero-badge-pct{position:absolute;top:10px;left:10px;z-index:2;background:rgba(2,95,97,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+.hero-bottle-wrap{position:relative;flex:none}
+.hero-bottle{width:190px;height:228px;border-radius:14px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bottle svg{max-height:85%;width:auto}
+.hero-bottle .bottle-photo{width:100%;height:100%;object-fit:contain;padding:10px}
+.hero-bottle:has(.bottle-photo){position:relative}
+.hero-bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.12),rgba(1,25,25,.02) 60%);mix-blend-mode:multiply;pointer-events:none}
+.hero-badge-pct{position:absolute;top:16px;left:-10px;z-index:2;background:rgba(2,95,97,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   color:#fff;border-radius:10px;padding:6px 11px;box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15)}
 .hero-row.rank-top .hero-badge-pct{background:rgba(184,132,42,.92)}
 .hero-badge-pct .pct{display:block;font-family:var(--font-display);font-weight:800;font-size:17px;line-height:1;letter-spacing:-.01em}
@@ -328,7 +330,7 @@ p{margin:0 0 1em}
 .shop-empty{font-size:12.5px;color:var(--text-muted);font-style:italic}
 .details-mini{font-size:13px;font-weight:700;color:var(--text-muted);text-decoration:none}
 .details-mini:hover{color:var(--accent-dark)}
-@media(max-width:560px){.hero-body{flex-basis:100%}.hero-bottle{width:120px;height:144px}}
+@media(max-width:560px){.hero-body{flex-basis:100%}.hero-bottle{width:140px;height:168px}}
 .why-toggle{display:flex;align-items:center;gap:5px;margin-top:8px;padding:0;border:none;background:none;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--accent);cursor:pointer}
 .why-toggle:hover{color:var(--accent-dark)}
 .why-car{font-size:12px;transition:transform .2s ease}

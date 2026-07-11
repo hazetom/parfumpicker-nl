@@ -599,9 +599,9 @@
       '<span class="shop-empty">Nog niet bij ICI Paris XL verkrijgbaar</span>';
     return '<div class="hero-row' + (isTop ? ' rank-top' : '') + '">' +
       '<div class="hero-rank">' + (rank < 10 ? "0" + rank : rank) + '</div>' +
-      '<div class="hero-bottle">' +
+      '<div class="hero-bottle-wrap">' +
       '<div class="hero-badge-pct"><span class="pct">' + pct + '%</span><span class="lbl">Match</span></div>' +
-      bottleVisualHtml(p) +
+      '<div class="hero-bottle">' + bottleVisualHtml(p) + '</div>' +
       '</div>' +
       '<div class="hero-body">' +
       (isTop ? '<span class="hero-toplabel">Onze aanrader</span>' : '') +
