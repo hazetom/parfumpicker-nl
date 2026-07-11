@@ -66,86 +66,109 @@
     return t.content.firstElementChild;
   }
 
-  function describeArc(cx, cy, r, a0, a1){
-    function toXY(a){ var rad = (a-90) * Math.PI/180; return {x: cx + r*Math.cos(rad), y: cy + r*Math.sin(rad)}; }
-    var p0 = toXY(a0), p1 = toXY(a1);
-    var large = (a1-a0) > 180 ? 1 : 0;
-    return "M " + p0.x.toFixed(2) + " " + p0.y.toFixed(2) + " A " + r + " " + r + " 0 " + large + " 1 " + p1.x.toFixed(2) + " " + p1.y.toFixed(2);
-  }
+  var RING_R = 42;
+  var RING_C = 2 * Math.PI * RING_R;
+  var lastShownCount = null;
 
-  function matchRingArcs(){
-    var n = STEPS.length, gap = 8, cx = 48, cy = 48, r = 38;
-    var seg = 360/n;
-    var html = "";
-    for (var i = 0; i < n; i++) {
-      var a0 = i*seg + gap/2, a1 = (i+1)*seg - gap/2;
-      var pending = i > state.step;
-      var stroke = pending ? "var(--border)" : "var(--accent)";
-      html += '<path d="' + describeArc(cx, cy, r, a0, a1) + '" fill="none" stroke="' + stroke + '" stroke-width="7" stroke-linecap="round"' +
-        (pending ? ' opacity="0.6" stroke-dasharray="3 5"' : '') + '/>';
+  function matchSentence(n){
+    if (!state.geslacht) return "We doorzoeken " + n + " parfums voor je.";
+    if (state.moment.length || state.seizoen.length) {
+      return n + " parfums die passen bij hoe en wanneer je 'm wil dragen.";
     }
-    return html;
+    if (state.budget) {
+      return n + " parfums binnen je budget.";
+    }
+    if (state.sillage && state.sillage !== "geen_voorkeur") {
+      return n + " parfums met precies de sterkte die je zoekt.";
+    }
+    if (state.persoonlijkheid.length) {
+      return n + " parfums die passen bij " + state.persoonlijkheid.join(", ") + ".";
+    }
+    var label = state.geslacht === "heren" ? "herenassortiment" : (state.geslacht === "dames" ? "damesassortiment" : "volledige assortiment");
+    return n + " parfums in het " + label + ".";
   }
 
-  function matchRingHtml(){
-    var n = liveMatchCount();
+  function matchRingPct(n){
+    var total = DATA.length || 1;
+    return Math.max(0, Math.min(1, 1 - (n / total)));
+  }
+
+  function matchRingHtml(displayCount, displayPct){
+    var offset = (RING_C * (1 - displayPct)).toFixed(1);
     return '<div class="match-ring-row">' +
-      '<div class="match-ring-wrap"><svg class="match-ring-svg" viewBox="0 0 96 96">' + matchRingArcs() + '</svg>' +
-      '<div class="match-ring-center"><span class="match-ring-count">' + n + '</span><small>passen nu</small></div></div>' +
-      '<div class="match-ring-copy"><h4>Jouw profiel</h4><p>Live bijgewerkt op basis van je antwoorden.</p></div>' +
+      '<div class="match-ring-wrap" id="matchRingWrap">' +
+      '<svg class="match-ring-svg" viewBox="0 0 96 96">' +
+      '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--border)" stroke-width="6"/>' +
+      '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" ' +
+      'stroke-dasharray="' + RING_C.toFixed(1) + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 48 48)" id="matchRingArc"/>' +
+      '</svg>' +
+      '<div class="match-ring-center"><span class="match-ring-count" id="matchRingCount">' + displayCount + '</span></div>' +
       '</div>' +
-      '<div class="wizard-insight" id="wizardInsight"></div>';
+      '<div class="match-ring-copy"><p class="match-ring-sentence" id="matchRingSentence">' + matchSentence(displayCount) + '</p></div>' +
+      '</div>';
   }
 
-  var insightTimer = null;
-  function showInsight(text){
-    var host = document.getElementById("wizardInsight");
-    if (!host || !text) return;
-    host.innerHTML = '<span>' + text + '</span>';
-    var span = host.querySelector("span");
-    requestAnimationFrame(function(){ span.classList.add("show"); });
-    clearTimeout(insightTimer);
-    insightTimer = setTimeout(function(){ span.classList.remove("show"); }, 2600);
-  }
-
-  function insightForGeslacht(g){
-    var pool = g === "unisex" ? DATA : DATA.filter(function(p){ return p.geslacht === g; });
-    var label = g === "heren" ? "herenassortiment" : (g === "dames" ? "damesassortiment" : "volledige assortiment");
-    return "We zoeken nu in het " + label + " &middot; " + pool.length + " parfums.";
-  }
-
-  function insightForPersoonlijkheid(tags){
-    if (!tags.length) return "";
-    var pool = DATA.filter(function(p){ return tags.some(function(t){ return p.persoonlijkheid.indexOf(t) > -1; }); });
-    var counts = {};
-    pool.forEach(function(p){ p.accords.forEach(function(a){ counts[a] = (counts[a]||0) + 1; }); });
-    var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0, 2);
-    if (!top.length) return "";
-    return tags.join(", ") + " &rarr; we richten ons op " + top.join(" en ") + ".";
-  }
-
-  function insightForSillage(v){
-    var bucket = SILLAGE_OPTIONS.filter(function(o){ return o.v === v; })[0];
-    if (!bucket || !bucket.match) return "Geen voorkeur &mdash; we wegen sillage niet mee.";
-    var pool = genderPool().filter(function(p){ return bucket.match.indexOf(p.sillage) > -1; });
-    return bucket.l + " &rarr; " + pool.length + " parfums met deze sterkte.";
+  function animateMatchRing(target){
+    var countEl = document.getElementById("matchRingCount");
+    var arcEl = document.getElementById("matchRingArc");
+    var wrapEl = document.getElementById("matchRingWrap");
+    var sentenceEl = document.getElementById("matchRingSentence");
+    if (!countEl) return;
+    if (sentenceEl) sentenceEl.innerHTML = matchSentence(target);
+    if (lastShownCount === null || lastShownCount === target) {
+      lastShownCount = target;
+      return;
+    }
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      countEl.textContent = target;
+      if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
+      lastShownCount = target;
+      return;
+    }
+    var start = lastShownCount;
+    if (wrapEl) wrapEl.classList.add("calculating");
+    requestAnimationFrame(function(){
+      if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
+    });
+    var range = Math.max(Math.abs(target - start), 25);
+    var ticks = 0, maxTicks = 8;
+    var timer = setInterval(function(){
+      ticks++;
+      if (ticks >= maxTicks) {
+        clearInterval(timer);
+        countEl.textContent = target;
+        if (wrapEl) wrapEl.classList.remove("calculating");
+        countEl.classList.add("pulse");
+        setTimeout(function(){ countEl.classList.remove("pulse"); }, 320);
+        lastShownCount = target;
+        return;
+      }
+      var jitter = Math.round(start + (Math.random()*2 - 1) * range * 0.65);
+      countEl.textContent = Math.max(1, jitter);
+    }, 42);
   }
 
   function renderShell(inner){
     var canBack = state.step > 0;
+    var target = liveMatchCount();
+    var initialCount = lastShownCount === null ? target : lastShownCount;
+    var initialPct = matchRingPct(initialCount);
+    var progressPct = Math.round(Math.min(state.step+1, STEPS.length) / STEPS.length * 100);
     root.innerHTML =
       '<div class="wizard-panel">' +
+      '<div class="wizard-progress"><div class="wizard-progress-fill" style="width:' + progressPct + '%"></div></div>' +
       '<div class="wizard-top-row">' +
       (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '<span></span>') +
-      '<div class="wizard-step-label">Stap ' + Math.min(state.step+1, STEPS.length) + ' &middot; ' + STEPS.length + '</div>' +
       '</div>' +
-      matchRingHtml() +
+      matchRingHtml(initialCount, initialPct) +
       '<div id="wizardInner"></div>' +
       '</div>';
     document.getElementById("wizardInner").innerHTML = inner;
     if (canBack) {
       document.getElementById("wizardBack").onclick = function(){ state.step = Math.max(0, state.step-1); render(); };
     }
+    animateMatchRing(target);
   }
 
   function goNext(){ state.step++; render(); }
@@ -191,7 +214,6 @@
       opts.appendChild(optionCard(o[1], state.geslacht===o[0], function(){
         state.geslacht = o[0];
         renderStepGeslacht();
-        showInsight(insightForGeslacht(o[0]));
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
@@ -205,7 +227,6 @@
       opts.appendChild(optionCard(o.l, state.sillage===o.v, function(){
         state.sillage = o.v;
         renderStepSillage();
-        showInsight(insightForSillage(o.v));
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
       }));
     });
@@ -254,7 +275,8 @@
       var matches = findMatches(q, 6);
       if (!q || !matches.length) { closeList(); showFeedback(); return; }
       list.innerHTML = matches.map(function(p){
-        return '<button type="button" class="autocomplete-item" data-id="' + p.id + '">' + p.naam + '<span>' + p.merk + '</span></button>';
+        var label = p.naam.toLowerCase().indexOf(p.merk.toLowerCase()) === 0 ? p.naam : (p.merk + " " + p.naam);
+        return '<button type="button" class="autocomplete-item" data-id="' + p.id + '">' + label + '<span>' + p.merk + '</span></button>';
       }).join("");
       list.classList.add("open");
       Array.prototype.forEach.call(list.querySelectorAll(".autocomplete-item"), function(btn){
@@ -285,11 +307,9 @@
         if (state.persoonlijkheid.length < 3) state.persoonlijkheid.push(v);
         if (state.persoonlijkheid.length === 3) {
           renderStepPersoonlijkheid();
-          showInsight(insightForPersoonlijkheid(state.persoonlijkheid));
           setTimeout(goNext, AUTO_ADVANCE_DELAY);
         } else {
           render();
-          showInsight(insightForPersoonlijkheid(state.persoonlijkheid));
         }
       }, true));
     });
@@ -693,6 +713,7 @@
     state.budget = null;
     state.step = 0;
     state.shown = [];
+    lastShownCount = null;
     try { history.pushState({}, "", location.pathname + location.hash); } catch (e) {}
     render();
     root.scrollIntoView({ behavior: "smooth", block: "start" });
