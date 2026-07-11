@@ -97,6 +97,9 @@
     var offset = (RING_C * (1 - displayPct)).toFixed(1);
     return '<div class="match-ring-row">' +
       '<div class="match-ring-wrap" id="matchRingWrap">' +
+      '<div class="match-ring-radar" id="matchRingRadar1"></div>' +
+      '<div class="match-ring-radar match-ring-radar-2" id="matchRingRadar2"></div>' +
+      '<div class="match-ring-grid" id="matchRingGrid"></div>' +
       '<svg class="match-ring-svg" viewBox="0 0 96 96">' +
       '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--border)" stroke-width="6"/>' +
       '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" ' +
@@ -104,8 +107,14 @@
       '</svg>' +
       '<div class="match-ring-center"><span class="match-ring-count" id="matchRingCount">' + displayCount + '</span></div>' +
       '</div>' +
-      '<div class="match-ring-copy"><p class="match-ring-sentence" id="matchRingSentence">' + matchSentence(displayCount) + '</p></div>' +
+      '<div class="match-ring-copy"><p class="match-ring-sentence" id="matchRingSentence">' + matchSentence(displayCount) + '</p>' +
+      '<div class="match-ring-micro" id="matchRingMicro">Berekenen&hellip;</div></div>' +
       '</div>';
+  }
+
+  function easeOutBack(t){
+    var c1 = 1.15, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
   }
 
   function animateMatchRing(target){
@@ -113,6 +122,10 @@
     var arcEl = document.getElementById("matchRingArc");
     var wrapEl = document.getElementById("matchRingWrap");
     var sentenceEl = document.getElementById("matchRingSentence");
+    var microEl = document.getElementById("matchRingMicro");
+    var radar1 = document.getElementById("matchRingRadar1");
+    var radar2 = document.getElementById("matchRingRadar2");
+    var gridEl = document.getElementById("matchRingGrid");
     if (!countEl) return;
     if (sentenceEl) sentenceEl.innerHTML = matchSentence(target);
     if (lastShownCount === null || lastShownCount === target) {
@@ -128,25 +141,33 @@
     }
     var start = lastShownCount;
     if (wrapEl) wrapEl.classList.add("calculating");
+    if (microEl) microEl.classList.add("show");
+    if (radar1) radar1.classList.add("go");
+    if (radar2) radar2.classList.add("go");
+    if (gridEl) gridEl.classList.add("show");
     requestAnimationFrame(function(){
       if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
     });
-    var range = Math.max(Math.abs(target - start), 25);
-    var ticks = 0, maxTicks = 8;
-    var timer = setInterval(function(){
-      ticks++;
-      if (ticks >= maxTicks) {
-        clearInterval(timer);
+    var dur = 680, beginTs = null;
+    function step(ts){
+      if (!beginTs) beginTs = ts;
+      var t = Math.min(1, (ts - beginTs) / dur);
+      var eased = easeOutBack(t);
+      var v = Math.round(start + (target - start) * eased);
+      countEl.textContent = Math.max(1, v);
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
         countEl.textContent = target;
         if (wrapEl) wrapEl.classList.remove("calculating");
-        countEl.classList.add("pulse");
-        setTimeout(function(){ countEl.classList.remove("pulse"); }, 320);
+        if (microEl) microEl.classList.remove("show");
+        if (radar1) radar1.classList.remove("go");
+        if (radar2) radar2.classList.remove("go");
+        if (gridEl) gridEl.classList.remove("show");
         lastShownCount = target;
-        return;
       }
-      var jitter = Math.round(start + (Math.random()*2 - 1) * range * 0.65);
-      countEl.textContent = Math.max(1, jitter);
-    }, 42);
+    }
+    requestAnimationFrame(step);
   }
 
   function renderShell(inner){
@@ -553,12 +574,41 @@
     var panel = document.querySelector(".wizard-panel");
     if (!panel) { cb(); return; }
     var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) { setTimeout(cb, 150); return; }
+
+    var all = rankedList();
+    var poolCount = liveMatchCount();
+    var finalCount = Math.min(RESULTS_PER_PAGE, all.length);
+
     var overlay = document.createElement("div");
     overlay.className = "wizard-scan-overlay";
-    overlay.innerHTML = '<div class="scan-line"></div><p>We vergelijken ' + DATA.length + ' parfums met jouw profiel&hellip;</p>';
+    overlay.innerHTML =
+      '<div class="scan-ring-wrap">' +
+      '<svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--border)" stroke-width="6"/>' +
+      '<circle id="scanArc" cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" ' +
+      'stroke-dasharray="' + RING_C.toFixed(1) + '" stroke-dashoffset="' + RING_C.toFixed(1) + '" transform="rotate(-90 48 48)"/></svg>' +
+      '<div class="scan-ring-center" id="scanRingLabel">' + DATA.length + '</div>' +
+      '</div>' +
+      '<ul class="scan-stage-list">' +
+      '<li><span class="scan-stage-tick">&#10003;</span>Profiel samengesteld</li>' +
+      '<li><span class="scan-stage-tick">&#10003;</span>' + DATA.length + ' parfums doorzocht</li>' +
+      '<li><span class="scan-stage-tick">&#10003;</span>Beste matches geselecteerd</li>' +
+      '</ul>';
     panel.appendChild(overlay);
-    requestAnimationFrame(function(){ overlay.classList.add("show"); });
-    setTimeout(cb, reduceMotion ? 150 : 850);
+
+    var arc = overlay.querySelector("#scanArc");
+    var label = overlay.querySelector("#scanRingLabel");
+    var items = overlay.querySelectorAll(".scan-stage-list li");
+
+    requestAnimationFrame(function(){
+      overlay.classList.add("show");
+      arc.setAttribute("stroke-dashoffset", "0");
+    });
+
+    setTimeout(function(){ items[0].classList.add("done"); }, 300);
+    setTimeout(function(){ items[1].classList.add("done"); label.textContent = poolCount; }, 850);
+    setTimeout(function(){ items[2].classList.add("done"); label.textContent = finalCount; }, 1400);
+    setTimeout(cb, 1800);
   }
 
   function stateToParams(){
