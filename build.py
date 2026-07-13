@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-8"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-9"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -346,7 +346,7 @@ def hero_card_html(total):
     ongoing transition) for the same reason. The 3-step list auto-cycles
     until expansion."""
     return f'''<div class="proof-row" id="proofRow">
-  <div class="card" id="engineCard">
+  <div class="card" id="engineCard" tabindex="0" role="button" aria-label="Start de ParfumPicker wizard">
     <div class="card-text">
       <div class="card-eyebrow"><span class="dot"></span>ParfumPicker Tool</div>
       <h2>Geef een geur die &eacute;cht past, in <span class="accent">6 vragen</span>.</h2>
@@ -487,6 +487,10 @@ def hero_card_html(total):
     }}
   }}
   if (card) card.addEventListener('click', function(){{ if (!expanded) expandToWizard(); }});
+  if (card) card.addEventListener('keydown', function(e){{
+    if (e.target !== card) return;
+    if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); if (!expanded) expandToWizard(); }}
+  }});
   if (ctaBtn) ctaBtn.addEventListener('click', function(e){{ e.stopPropagation(); expandToWizard(); }});
   if (heroBtn) heroBtn.addEventListener('click', expandToWizard);
 }})();
