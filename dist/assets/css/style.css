@@ -108,20 +108,65 @@ p{margin:0 0 1em}
 .mobile-nav a{font-weight:700;font-size:17px}
 .mobile-nav .close{align-self:flex-end;background:none;border:none;font-size:26px;cursor:pointer}
 
-/* Hero */
-.hero{padding:52px 0 44px}
-.hero .inner{display:grid;gap:40px;align-items:center}
-@media(min-width:960px){.hero .inner{grid-template-columns:1.05fr .95fr}}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--accent-light);color:var(--accent-dark);
-  font-weight:700;font-size:13px;padding:7px 14px;border-radius:999px;margin-bottom:18px}
-.hero h1{font-size:clamp(32px,5vw,50px)}
-.hero h1 .accent{color:var(--accent)}
-.hero p.lead{font-size:17px;color:var(--text-muted);max-width:46ch}
-.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px}
+/* Hero: bold editorial headline, no photo — the proof is the live tool below it */
+.hero{padding:64px 0 0}
+.hero h1{font-size:clamp(34px,6vw,64px);font-weight:600;letter-spacing:-.03em;line-height:1.0;margin-bottom:20px}
+.hero h1 .fade{color:var(--text-muted)}
+.hero-sub{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:48px}
+.hero p.lead{font-size:17px;line-height:1.5;color:var(--text-muted);max-width:44ch;margin:0}
+.hero-cta{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.hero-cta-sub{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:8px;letter-spacing:.03em}
 .micro-trust{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-muted)}
-.hero-art{position:relative;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg);aspect-ratio:1/1}
-.hero-art img{width:100%;height:100%;object-fit:cover}
-.hero-art::after{content:"";position:absolute;inset:0;background:linear-gradient(155deg,rgba(2,95,97,.30),rgba(1,25,25,.05) 55%);mix-blend-mode:multiply;pointer-events:none}
+
+/* Proof row: engine card (live demo, click to expand into the real wizard)
+   + an auto-cycling list of the 3 steps, sitting beside it until expansion. */
+.proof-row{display:flex;gap:24px;margin-bottom:88px;align-items:stretch}
+.engine-card{
+  background:var(--accent);border-radius:var(--radius-lg);padding:0;
+  min-height:360px;position:relative;overflow:hidden;flex-shrink:0;width:420px;max-width:100%;
+  box-shadow:0 24px 60px -24px rgba(2,95,97,.5);cursor:pointer;
+  transition:width .7s cubic-bezier(.16,1,.3,1),min-height .5s ease,background-color .5s ease,box-shadow .5s ease;
+}
+.engine-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(255,255,255,.09) 1.5px,transparent 1.5px);
+  background-size:22px 22px;transition:opacity .5s ease;
+}
+.engine-card.expanded::before{opacity:0}
+.engine-card.expanded{width:100%;background:#fff;box-shadow:var(--shadow-lg);cursor:default}
+@media(prefers-reduced-motion:reduce){.engine-card{transition:none}}
+
+.engine-proof{display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:36px;position:relative;z-index:2;min-height:360px;transition:opacity .25s ease}
+.engine-card.expanded .engine-proof{display:none}
+.engine-wizard{display:none}
+.engine-card.expanded .engine-wizard{display:block;animation:engineWizardIn .45s cubic-bezier(.16,1,.3,1)}
+.engine-card .engine-wizard .wizard-panel{border:none;box-shadow:none;border-radius:0;max-width:none}
+@keyframes engineWizardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.engine-card.expanded .engine-wizard{animation:none}}
+.engine-top{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+.engine-top .dot{width:6px;height:6px;border-radius:50%;background:#5eead4;animation:engineBlink 2s ease-in-out infinite}
+@keyframes engineBlink{0%,100%{opacity:1}50%{opacity:.3}}
+.engine-mid{display:flex;align-items:center;gap:28px;margin:24px 0}
+.radar{position:relative;width:96px;height:96px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.radar-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);animation:radarPing 2.8s cubic-bezier(.2,.6,.4,1) infinite}
+.radar-ring.r2{animation-delay:.9s}
+@keyframes radarPing{0%{width:28px;height:28px;opacity:.7}100%{width:96px;height:96px;opacity:0}}
+.radar-core{position:relative;z-index:2;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center}
+.radar-core span{font-family:var(--font-mono);font-size:15px;font-weight:700;color:#fff}
+.engine-copy h3{font-size:24px;font-weight:700;color:#fff;margin:0 0 8px;letter-spacing:-.02em}
+.engine-copy p{font-size:14px;color:rgba(255,255,255,.75);line-height:1.5;margin:0}
+.engine-cta{display:inline-flex;align-items:center;gap:10px;width:fit-content;background:#fff;color:var(--accent-dark);padding:14px 22px;border-radius:10px;font-size:14.5px;font-weight:700;border:none;cursor:pointer;box-shadow:0 14px 30px -12px rgba(0,0,0,.35)}
+
+.steps-col{display:flex;flex-direction:column;justify-content:center;gap:0;padding-left:8px;overflow:hidden;flex-shrink:0;transition:opacity .4s ease,width .5s ease,margin .5s ease}
+.steps-col.hidden{opacity:0;width:0;margin-left:0;pointer-events:none}
+.step-line{display:flex;align-items:baseline;gap:16px;padding:17px 0;border-bottom:1px solid var(--border);white-space:nowrap}
+.step-line:first-child{padding-top:0}
+.step-line .num{font-family:var(--font-mono);font-size:12px;color:var(--border);flex-shrink:0;width:18px}
+.step-line .txt{font-size:22px;font-weight:500;color:var(--border);letter-spacing:-.01em;transition:color .3s ease}
+.step-line.on .txt{color:var(--text);font-weight:600}
+.step-line.on .num{color:var(--accent)}
+@media(max-width:900px){.proof-row{flex-direction:column}.engine-card{width:100%}.steps-col{padding-left:0}}
+@media(prefers-reduced-motion:reduce){.step-line .txt,.steps-col{transition:none}}
 
 /* Trust row */
 .trust-row{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 0}
@@ -132,57 +177,44 @@ p{margin:0 0 1em}
 .trust-item strong{display:block;font-size:14.5px;margin-bottom:2px}
 .trust-item span{font-size:13px;color:var(--text-muted)}
 
-/* Wizard embed panel: the product, front and center right under the hero */
-.wizard-embed{position:relative;background:var(--bg-soft);padding:56px 0 72px;overflow:hidden}
-.wizard-embed::before{
-  content:"";position:absolute;top:-220px;left:50%;transform:translateX(-50%);
-  width:900px;height:520px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(2,95,97,.09),rgba(2,95,97,0) 72%);
-}
-.wizard-kicker{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-weight:700;font-size:13.5px;color:var(--accent-dark);margin-bottom:18px}
-.wizard-kicker .icon{width:16px;height:16px}
-
-/* Wizard + reserved ad rail. Rail only appears once there's genuinely room
-   beside an 860px panel (>=1180px); it never competes for space with the
-   option tiles themselves. */
+/* Wizard embed: the tool lives inside the engine-card once expanded (see
+   .proof-row above) or, on the standalone /wizard/ page, is shown directly. */
+.wizard-embed{position:relative}
 .container-wide{max-width:1240px}
-.wizard-layout{position:relative}
-.wizard-rail{display:none}
-@media(min-width:1180px){
-  .wizard-layout{display:grid;grid-template-columns:minmax(0,860px) 300px;gap:32px;justify-content:center;align-items:start}
-  .wizard-rail{display:block}
-  .ad-rail-sticky{position:sticky;top:96px}
-}
-.ad-unit{
-  margin:0 auto;max-width:100%;border:1px dashed var(--border);border-radius:var(--radius-sm);
-  background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:var(--text-muted);font-size:12.5px;font-weight:600;letter-spacing:.02em;
-}
-.ad-unit .ad-unit-size{font-size:11px;color:var(--border);font-weight:500;letter-spacing:0}
 .wizard-panel{position:relative;background-color:#fff;
   background-image:radial-gradient(circle,rgba(2,95,97,.07) 1px,transparent 1.3px);background-size:20px 20px;
   transition:background-image .5s ease;
-  border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:32px;margin:0 auto;max-width:860px}
+  border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:0;margin:0 auto;max-width:900px;overflow:hidden}
 .wizard-panel.panel-calculating{background-image:radial-gradient(circle,rgba(2,95,97,.14) 1px,transparent 1.3px)}
-@media(min-width:640px){.wizard-panel{padding:44px 48px}}
 @media(prefers-reduced-motion:reduce){.wizard-panel{transition:none}}
-.wizard-top-row{display:flex;align-items:center;justify-content:flex-start;margin-bottom:22px}
+
+.wizard-topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 28px;border-bottom:1px solid var(--border)}
+.wizard-topbar-left{display:flex;align-items:center;gap:14px}
 .wizard-back{display:flex;align-items:center;gap:2px;background:none;border:0;padding:4px 2px;margin:-4px -2px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text-muted);cursor:pointer;transition:color .15s ease}
 .wizard-back:hover{color:var(--accent-dark)}
 .wizard-back-chevron{font-size:17px;line-height:1}
-
-/* Real progress fill — replaces the old decorative bar + "Stap X van 6" text.
-   Width tracks the current step directly, so this is the only progress signal. */
-.wizard-progress{position:absolute;top:0;left:28px;right:28px;height:3px;border-radius:0 0 4px 4px;background:var(--border);overflow:hidden}
-.wizard-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:0 0 4px 4px;transition:width .45s cubic-bezier(.16,1,.3,1)}
+.wizard-steplabel{font-family:var(--font-mono);font-size:11.5px;color:var(--accent);font-weight:700;letter-spacing:.04em}
+.wizard-progress{width:150px;height:4px;border-radius:2px;background:var(--border);overflow:hidden;flex:none}
+.wizard-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width .45s cubic-bezier(.16,1,.3,1)}
 @media(prefers-reduced-motion:reduce){.wizard-progress-fill{transition:none}}
+@media(max-width:560px){.wizard-progress{display:none}}
+
+.wizard-body{display:flex;align-items:stretch;gap:0}
+.wizard-main{flex:1;min-width:0;padding:36px}
+.wizard-side{width:230px;flex:none;background:linear-gradient(180deg,#F6FBFA,#EEF7F6);border-left:1px solid rgba(2,95,97,.14);padding:28px 22px;display:flex;flex-direction:column;align-items:center;text-align:center}
+@media(max-width:760px){.wizard-body{flex-direction:column}.wizard-side{width:auto;border-left:none;border-top:1px solid rgba(2,95,97,.14)}.wizard-main{padding:28px}}
+
+.wizard-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--text);margin-bottom:18px;align-self:flex-start}
+.wizard-brand .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);position:relative;flex:none}
+.wizard-brand .mark::after{content:"";position:absolute;inset:6px;border-radius:2px;background:#fff}
+@media(max-width:760px){.wizard-brand{align-self:center}}
 
 /* Live matchring: the fill level shows how much the pool has narrowed
    (1 - count/752), decoupled from step progress. On change, the count moves
    with a slight "overshoot & settle" (spring-like) instead of a linear tween,
    and a radar pulse + faint data-grid mark the moment as a real recalculation. */
-.match-ring-row{display:flex;align-items:center;gap:20px;margin-bottom:6px}
-.match-ring-wrap{position:relative;flex:none;width:96px;height:96px}
+.match-ring-row{display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:2px}
+.match-ring-wrap{position:relative;flex:none;width:120px;height:120px}
 .match-ring-svg{width:100%;height:100%;position:relative;z-index:2}
 .match-ring-svg circle{transition:stroke-dashoffset .68s cubic-bezier(.22,1.28,.36,1)}
 @media(prefers-reduced-motion:reduce){.match-ring-svg circle{transition:none}}
@@ -198,10 +230,10 @@ p{margin:0 0 1em}
 .match-ring-grid.show{opacity:.16}
 @media(prefers-reduced-motion:reduce){.match-ring-radar.go{animation:none;display:none}.match-ring-grid{transition:none}}
 .match-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2}
-.match-ring-count{font-family:var(--font-mono);font-weight:700;font-size:30px;color:var(--accent-dark);font-variant-numeric:tabular-nums;line-height:1}
-.match-ring-copy{flex:1;min-width:0}
-.match-ring-sentence{margin:0;font-size:14.5px;font-weight:600;color:var(--text);line-height:1.4}
-.match-ring-micro{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);height:14px;margin-top:5px;opacity:0;transition:opacity .2s ease}
+.match-ring-count{font-family:var(--font-mono);font-weight:700;font-size:32px;color:var(--accent-dark);font-variant-numeric:tabular-nums;line-height:1}
+.match-ring-copy{margin-top:14px}
+.match-ring-sentence{margin:0;font-size:13.5px;font-weight:600;color:var(--text);line-height:1.45}
+.match-ring-micro{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);height:14px;margin-top:6px;opacity:0;transition:opacity .2s ease}
 .match-ring-micro.show{opacity:1}
 @media(prefers-reduced-motion:reduce){.match-ring-micro{transition:none}}
 
@@ -254,6 +286,28 @@ p{margin:0 0 1em}
 @keyframes optionIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.option-card.selected:not(.multi){animation:none}.option-card{animation:none;opacity:1}}
 .option-card .price{display:block;font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--accent);letter-spacing:.02em;margin-bottom:4px}
+
+/* Pill variant: multi-select, low-commitment choices (persoonlijkheid, voorkeur) */
+.option-pill-grid{display:flex;flex-wrap:wrap;gap:10px}
+.option-pill{border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:11px 20px;font-weight:600;font-size:14.5px;cursor:pointer;opacity:0;animation:optionIn .32s cubic-bezier(.16,1,.3,1) forwards;transition:border-color .15s ease,background .15s ease,color .15s ease}
+.option-pill:hover{border-color:var(--accent)}
+.option-pill.selected{border-color:var(--accent);background:var(--accent);color:#fff}
+.option-pill.at-cap{opacity:.45;pointer-events:none;animation:none}
+@media(prefers-reduced-motion:reduce){.option-pill{animation:none;opacity:1}}
+
+/* Row variant: single-select with an icon/photo, one per full-width row (geslacht, sillage, budget) */
+.option-row-list{display:flex;flex-direction:column;gap:12px}
+.option-row{position:relative;display:flex;align-items:center;gap:16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 18px;background:#fff;cursor:pointer;text-align:left;font-family:inherit;width:100%;opacity:0;animation:optionIn .32s cubic-bezier(.16,1,.3,1) forwards;transition:border-color .15s ease,background .15s ease,transform .15s ease,box-shadow .15s ease}
+.option-row:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow)}
+.option-row.selected{border-color:var(--accent);background:var(--accent-light)}
+.option-row-icon{flex:none;width:44px;height:44px;border-radius:10px;background:var(--bg-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.option-row-icon img{width:100%;height:100%;object-fit:cover}
+.option-row-icon svg{width:20px;height:20px;stroke:var(--text-muted)}
+.option-row-label{flex:1;font-weight:700;font-size:15.5px}
+.option-row-label .price{color:var(--accent);font-weight:700;margin-right:4px}
+.option-row-chevron{flex:none;width:32px;height:32px;border-radius:50%;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;transition:background .15s ease,color .15s ease}
+.option-row.selected .option-row-chevron{background:var(--accent);color:#fff}
+@media(prefers-reduced-motion:reduce){.option-row{animation:none;opacity:1}}
 
 /* Step transitions */
 #wizardInner{animation:wizardStepIn .35s cubic-bezier(.16,1,.3,1)}

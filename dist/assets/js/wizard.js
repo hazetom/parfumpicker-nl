@@ -41,6 +41,8 @@
   };
 
   var STEPS = ["geslacht","bekend","persoonlijkheid","sillage","budget","voorkeur"];
+  var STEP_LABELS = {geslacht:"GESLACHT", bekend:"BEKENDE GEUR", persoonlijkheid:"PERSOONLIJKHEID", sillage:"SILLAGE", budget:"BUDGET", voorkeur:"VOORKEUR"};
+  function pad2(n){ return n < 10 ? "0"+n : ""+n; }
 
   var root = document.getElementById("wizardApp");
   var DATA = [];
@@ -238,21 +240,32 @@
     setTimeout(function(){ rowWait.classList.add("show"); bootDone = true; }, 1080);
   }
 
+  var BRAND_MARK = '<span class="mark"></span>';
+
   function renderShell(inner){
     var canBack = state.step > 0;
     var target = liveMatchCount();
     var initialCount = lastShownCount === null ? target : lastShownCount;
     var initialPct = matchRingPct(initialCount);
+    var stepKey = STEPS[state.step];
     var progressPct = Math.round(Math.min(state.step+1, STEPS.length) / STEPS.length * 100);
     root.innerHTML =
       '<div class="wizard-panel">' +
-      '<div class="wizard-progress"><div class="wizard-progress-fill" style="width:' + progressPct + '%"></div></div>' +
-      '<div class="wizard-top-row">' +
-      (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '<span></span>') +
+      '<div class="wizard-topbar">' +
+      '<div class="wizard-topbar-left">' +
+      (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '') +
+      '<span class="wizard-steplabel">STAP ' + pad2(state.step+1) + ' / ' + pad2(STEPS.length) + ' &mdash; ' + STEP_LABELS[stepKey] + '</span>' +
       '</div>' +
+      '<div class="wizard-progress"><div class="wizard-progress-fill" style="width:' + progressPct + '%"></div></div>' +
+      '</div>' +
+      '<div class="wizard-body">' +
+      '<div class="wizard-main"><div id="wizardInner"></div></div>' +
+      '<div class="wizard-side">' +
+      '<div class="wizard-brand">' + BRAND_MARK + 'ParfumPicker</div>' +
       statusStackHtml() +
       matchRingHtml(initialCount, initialPct) +
-      '<div id="wizardInner"></div>' +
+      '</div>' +
+      '</div>' +
       '</div>';
     document.getElementById("wizardInner").innerHTML = inner;
     if (canBack) {
@@ -285,8 +298,21 @@
 
   function optionCard(label, selected, onClick, multi){
     var d = document.createElement("div");
-    d.className = "option-card" + (selected ? " selected" : "") + (multi ? " multi" : "");
-    d.innerHTML = "<div>" + label + "</div>";
+    d.className = "option-pill" + (selected ? " selected" : "") + (multi ? " multi" : "");
+    d.innerHTML = label;
+    d.onclick = onClick;
+    return d;
+  }
+
+  var UNISEX_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg>';
+
+  function optionRow(iconHtml, label, selected, onClick){
+    var d = document.createElement("button");
+    d.type = "button";
+    d.className = "option-row" + (selected ? " selected" : "");
+    d.innerHTML = '<span class="option-row-icon">' + iconHtml + '</span>' +
+      '<span class="option-row-label">' + label + '</span>' +
+      '<span class="option-row-chevron">&#8250;</span>';
     d.onclick = onClick;
     return d;
   }
@@ -298,11 +324,19 @@
     });
   }
 
+  function genderIconHtml(key){
+    if (key === "unisex") return UNISEX_ICON;
+    var wantId = key === "heren" ? "dior-sauvage-edt" : "chanel-coco-mademoiselle-edp";
+    var p = DATA.filter(function(x){ return x.id === wantId; })[0];
+    if (p && p.afbeelding_url) return '<img src="' + p.afbeelding_url + '" alt="" loading="lazy">';
+    return UNISEX_ICON;
+  }
+
   function renderStepGeslacht(){
-    renderShell('<span class="wizard-question">Voor wie zoek je een parfum?</span><p class="wizard-hint">Dit bepaalt meteen welke geuren we je laten zien.</p><div class="option-grid" id="opts"></div>');
+    renderShell('<span class="wizard-question">Voor wie zoek je een parfum?</span><p class="wizard-hint">Dit bepaalt meteen welke geuren we je laten zien.</p><div class="option-row-list" id="opts"></div>');
     var opts = document.getElementById("opts");
-    [["heren","Voor een man"],["dames","Voor een vrouw"],["unisex","Unisex / geen voorkeur"]].forEach(function(o){
-      var card = optionCard(o[1], state.geslacht===o[0], function(){
+    [["dames","Voor een vrouw"],["heren","Voor een man"],["unisex","Unisex / geen voorkeur"]].forEach(function(o){
+      var card = optionRow(genderIconHtml(o[0]), o[1], state.geslacht===o[0], function(){
         Array.prototype.forEach.call(opts.children, function(el){ el.classList.remove("selected"); });
         state.geslacht = o[0];
         card.classList.add("selected");
@@ -316,11 +350,18 @@
     navForward(!!state.geslacht, "Volgende", goNext);
   }
 
+  var SILLAGE_ICONS = {
+    subtiel: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8c0 6-5 9-5 13-4-2-7-5-7-9a7 7 0 0 1 12-5 6 6 0 0 1-3 8"/></svg>',
+    gemiddeld: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M2 17c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg>',
+    opvallend: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+    geen_voorkeur: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12a3 3 0 1 0 6 0 3 3 0 1 0 6 0 3 3 0 1 0-6 0 3 3 0 1 0-6 0Z"/></svg>'
+  };
+
   function renderStepSillage(){
-    renderShell('<span class="wizard-question">Hoe subtiel of opvallend mag de geur zijn?</span><p class="wizard-hint">Dit bepaalt de sterkte (sillage) van het parfum.</p><div class="option-grid" id="opts"></div>');
+    renderShell('<span class="wizard-question">Hoe subtiel of opvallend mag de geur zijn?</span><p class="wizard-hint">Dit bepaalt de sterkte (sillage) van het parfum.</p><div class="option-row-list" id="opts"></div>');
     var opts = document.getElementById("opts");
     SILLAGE_OPTIONS.forEach(function(o){
-      opts.appendChild(optionCard(o.l, state.sillage===o.v, function(){
+      opts.appendChild(optionRow(SILLAGE_ICONS[o.v] || "", o.l, state.sillage===o.v, function(){
         state.sillage = o.v;
         renderStepSillage();
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
@@ -393,7 +434,7 @@
   }
 
   function renderStepPersoonlijkheid(){
-    renderShell('<span class="wizard-question">Hoe zou je de persoonlijkheid omschrijven?</span><p class="wizard-hint">Kies tot 3 kenmerken (optioneel).</p><div class="option-grid" id="opts"></div>');
+    renderShell('<span class="wizard-question">Hoe zou je de persoonlijkheid omschrijven?</span><p class="wizard-hint">Kies tot 3 kenmerken (optioneel).</p><div class="option-pill-grid" id="opts"></div>');
     var opts = document.getElementById("opts");
 
     function refreshCap(){
@@ -425,12 +466,14 @@
     navForward(true, "Volgende", goNext);
   }
 
+  var BUDGET_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8.5c-1-1.3-2.7-2-4.5-2-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5c1.8 0 3.5-.7 4.5-2"/><path d="M4 10h8M4 14h8"/></svg>';
+
   function renderStepBudget(){
-    renderShell('<span class="wizard-question">Wat is je budget?</span><p class="wizard-hint">We houden ons hieraan bij elk advies.</p><div class="option-grid" id="opts"></div>');
+    renderShell('<span class="wizard-question">Wat is je budget?</span><p class="wizard-hint">We houden ons hieraan bij elk advies.</p><div class="option-row-list" id="opts"></div>');
     var opts = document.getElementById("opts");
     BUDGET_OPTIONS.forEach(function(o){
-      var priceHtml = '<span class="price">' + o.p + '</span>';
-      opts.appendChild(optionCard(priceHtml + o.l, state.budget===o.v, function(){
+      var label = '<span class="price">' + o.p + '</span> ' + o.l;
+      opts.appendChild(optionRow(BUDGET_ICON, label, state.budget===o.v, function(){
         state.budget = o.v;
         renderStepBudget();
         setTimeout(goNext, AUTO_ADVANCE_DELAY);
@@ -443,9 +486,9 @@
     renderShell(
       '<span class="wizard-question">Wanneer wordt dit vooral gedragen?</span>' +
       '<p class="wizard-hint">Optioneel, voor extra verfijning. Mag meerdere per groep.</p>' +
-      '<div class="option-grid" id="optsMoment"></div>' +
+      '<div class="option-pill-grid" id="optsMoment"></div>' +
       '<p class="wizard-subhead">In welk seizoen?</p>' +
-      '<div class="option-grid" id="optsSeizoen"></div>'
+      '<div class="option-pill-grid" id="optsSeizoen"></div>'
     );
     var optsMoment = document.getElementById("optsMoment");
     MOMENT_OPTIONS.forEach(function(o){
@@ -932,6 +975,10 @@
     var sp = new URLSearchParams(location.search);
     var sharedCount = paramsToState(sp);
     if (sharedCount) {
+      var ec = document.getElementById("engineCard");
+      if (ec) ec.classList.add("expanded");
+      var sc = document.getElementById("stepsCol");
+      if (sc) sc.classList.add("hidden");
       showResults(sharedCount);
     } else {
       render();

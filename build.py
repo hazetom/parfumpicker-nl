@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-1"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-2"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -303,34 +303,69 @@ def perfume_card_html(p, base, rank=None, badge=None):
   <a class="details-link" href="{rel('/parfums/'+p['id']+'/', base)}">Bekijk details {icon('arrow')}</a>
 </article>'''
 
-def ad_slot_html(width, height, label="Advertentie"):
-    """Reserved, clearly-labeled placeholder. No ad network wired up yet -
-    drop a real ad tag inside .ad-unit once one is configured. Deliberately
-    NOT placed between clickable option tiles (accidental-click risk); see
-    wizard_shell_html() for where this is allowed to live."""
-    return f'''<div class="ad-unit" style="width:{width}px;height:{height}px" aria-hidden="true">
-  <span>{esc(label)}</span><span class="ad-unit-size">{width}&times;{height}</span>
-</div>'''
-
 def wizard_shell_html(inner_html):
-    return f'''<div class="wizard-layout">
-  <div class="wizard-main">{inner_html}</div>
-  <aside class="wizard-rail" aria-hidden="true">
-    <div class="ad-rail-sticky">{ad_slot_html(300, 600)}</div>
-  </aside>
-</div>'''
+    """Plain wizard shell with no surrounding hero chrome - used on the
+    standalone /wizard/ page where the tool is already the whole point,
+    so it renders already-expanded with no proof-card/expand step."""
+    return f'''<div class="container-wide">{inner_html}</div>'''
 
-def wizard_embed_html(base):
+def wizard_data_scripts(base):
     data_json = json.dumps(PERFUMES, ensure_ascii=False)
     cfg_json = json.dumps({"parfumBase": base + "parfums/"})
-    return f'''<section class="wizard-embed" id="wizard">
-  <div class="container container-wide">
-    <div class="wizard-kicker reveal">{icon('compass')} 6 korte vragen &middot; 1 minuut &middot; gratis</div>
-    {wizard_shell_html('<div id="wizardApp"></div>')}
-  </div>
-</section>
-<script>window.PARFUM_DATA = {data_json};window.WIZARD_CONFIG = {cfg_json};</script>
+    return f'''<script>window.PARFUM_DATA = {data_json};window.WIZARD_CONFIG = {cfg_json};</script>
 <script src="{rel("/assets/js/wizard.js", base)}?v={ASSET_VERSION}" defer></script>'''
+
+def hero_engine_card_html(total):
+    """The homepage entry point: a compact 'live analysis' proof card that
+    expands in place into the real wizard on click (see engineExpand script
+    in build_homepage). The 3-step list beside it auto-cycles until then."""
+    return f'''<div class="proof-row" id="proofRow">
+  <div class="engine-card" id="engineCard">
+    <div class="engine-proof" id="engineProof">
+      <div class="engine-top"><span class="dot"></span>LIVE ANALYSE</div>
+      <div class="engine-mid">
+        <div class="radar"><span class="radar-ring"></span><span class="radar-ring r2"></span><div class="radar-core"><span>{total}</span></div></div>
+        <div class="engine-copy"><h3>ParfumPicker Tool</h3><p>Beantwoord 6 vragen en ontdek jouw match uit {total} parfums.</p></div>
+      </div>
+      <button type="button" class="engine-cta" id="engineCtaBtn">Start nu {icon('arrow')}</button>
+    </div>
+    <div class="engine-wizard" id="engineWizard"><div id="wizardApp"></div></div>
+  </div>
+  <div class="steps-col" id="stepsCol">
+    <div class="step-line" data-step="1"><span class="num mono">01</span><span class="txt">Beantwoord 6 gerichte vragen</span></div>
+    <div class="step-line" data-step="2"><span class="num mono">02</span><span class="txt">Wij wegen top-, hart- en basisnoten</span></div>
+    <div class="step-line" data-step="3"><span class="num mono">03</span><span class="txt">Ontvang je persoonlijke top 3</span></div>
+  </div>
+</div>
+<script>
+(function(){{
+  var stepsCol = document.getElementById('stepsCol');
+  var card = document.getElementById('engineCard');
+  var ctaBtn = document.getElementById('engineCtaBtn');
+  var heroBtn = document.getElementById('heroStartBtn');
+  var expanded = false;
+  var lines = stepsCol ? stepsCol.querySelectorAll('.step-line') : [];
+  var idx = -1, timer = null;
+  function cycle(){{
+    for (var i=0;i<lines.length;i++) lines[i].classList.remove('on');
+    idx = (idx + 1) % (lines.length + 1);
+    if (idx < lines.length) lines[idx].classList.add('on');
+    timer = setTimeout(cycle, idx < lines.length ? 1400 : 900);
+  }}
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (lines.length && !reduceMotion) cycle();
+  function expandToWizard(){{
+    if (expanded) return;
+    expanded = true;
+    if (timer) clearTimeout(timer);
+    if (stepsCol) stepsCol.classList.add('hidden');
+    if (card) card.classList.add('expanded');
+  }}
+  if (card) card.addEventListener('click', function(){{ if (!expanded) expandToWizard(); }});
+  if (ctaBtn) ctaBtn.addEventListener('click', function(e){{ e.stopPropagation(); expandToWizard(); }});
+  if (heroBtn) heroBtn.addEventListener('click', expandToWizard);
+}})();
+</script>'''
 
 print("componenten geladen")
 
@@ -338,27 +373,27 @@ print("componenten geladen")
 def build_homepage():
     path = "/"
     base = depth_base(path)
+    total = len(PERFUMES)
     top10 = [BY_ID[i] for i in TOP10_IDS if i in BY_ID]
     cards = "\n".join(perfume_card_html(p, base, rank=idx+1) for idx, p in enumerate(top10))
     content = f'''
-<section class="hero">
-  <div class="container inner">
-    <div>
-      <div class="eyebrow">{icon('compass')} De leukste manier om een parfum cadeau te doen</div>
-      <h1>Het parfum dat bij hém of háár past, in <span class="accent">5 klikken.</span></h1>
-      <p class="lead">Ons algoritme doorzoekt tientallen geuren en toont je bekende favorieten én de verrassend goede match, zonder account, zonder abonnement.</p>
+<section class="hero" id="wizard">
+  <div class="container">
+    <h1>Zes vragen.<br>E&eacute;n <span class="fade">precieze</span> match.</h1>
+    <div class="hero-sub">
+      <p class="lead">Geen giswerk. Ons algoritme weegt stijl, sillage en geurnoten tegen {total} parfums &mdash; jij krijgt een onderbouwd advies, geen toevalstreffer.</p>
       <div class="hero-cta">
-        <a href="{rel("/#wizard", base)}" class="btn btn-primary">Start ParfumPicker {icon('arrow')}</a>
-        <div class="micro-trust">{icon('check')} 100% gratis &middot; Direct resultaat</div>
+        <div>
+          <button type="button" class="btn btn-primary" id="heroStartBtn">Start de wizard {icon('arrow')}</button>
+          <div class="hero-cta-sub">GEEN ACCOUNT NODIG</div>
+        </div>
       </div>
     </div>
-    <div class="hero-art reveal">
-      <img src="{HERO_PHOTO}" alt="Parfumfles, sfeerbeeld" loading="eager">
-    </div>
+    {hero_engine_card_html(total)}
   </div>
 </section>
 
-{wizard_embed_html(base)}
+{wizard_data_scripts(base)}
 
 {trust_row_html()}
 
@@ -482,7 +517,7 @@ print(f"{len(PERFUMES)} parfumpagina's geschreven")
 # ---------- wizard-pagina ----------
 def build_wizard_page():
     path = "/wizard/"
-    data_json = json.dumps(PERFUMES, ensure_ascii=False)
+    base = depth_base(path)
     content = f'''
 <section class="container container-wide" style="padding-top:20px">
   <div class="section-head reveal">
@@ -491,8 +526,7 @@ def build_wizard_page():
   </div>
   {wizard_shell_html('<div id="wizardApp"></div>')}
 </section>
-<script>window.PARFUM_DATA = {data_json};window.WIZARD_CONFIG = {json.dumps({"parfumBase": "../parfums/"})};</script>
-<script src="../assets/js/wizard.js?v={ASSET_VERSION}" defer></script>
+{wizard_data_scripts(base)}
 '''
     html_out = base_page(
         title="Gratis parfumwizard: vind het perfecte cadeau | ParfumPicker.nl",
