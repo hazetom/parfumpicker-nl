@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-11-11"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-1"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -236,9 +236,9 @@ def base_page(title, description, content, path="/", noindex=False, active_nav="
 <link rel="canonical" href="{canonical}">
 {robots}
 <link rel="icon" href="{rel("/assets/img/logo.svg", base)}" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" href="{rel("/assets/fonts/Geist-Regular.woff2", base)}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{rel("/assets/fonts/Geist-SemiBold.woff2", base)}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{rel("/assets/vendor/open-props.min.css", base)}?v={ASSET_VERSION}">
 <link rel="stylesheet" href="{rel("/assets/css/style.css", base)}?v={ASSET_VERSION}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(description)}">

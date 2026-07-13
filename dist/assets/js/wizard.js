@@ -68,7 +68,10 @@
 
   var RING_R = 42;
   var RING_C = 2 * Math.PI * RING_R;
+  var RING_TICKS = 20;
   var lastShownCount = null;
+  var bootDone = false;
+  var hasGivenInput = false;
 
   function matchSentence(n){
     if (!state.geslacht) return "We doorzoeken " + n + " parfums voor je.";
@@ -93,19 +96,29 @@
     return Math.max(0, Math.min(1, 1 - (n / total)));
   }
 
+  function ringDotsHtml(onCount){
+    var dots = "";
+    var cx = 48, cy = 48, r = 42;
+    for (var i = 0; i < RING_TICKS; i++){
+      var angle = (i / RING_TICKS) * Math.PI * 2 - Math.PI/2;
+      var x = (cx + r * Math.cos(angle)).toFixed(2);
+      var y = (cy + r * Math.sin(angle)).toFixed(2);
+      dots += '<circle class="match-ring-dot' + (i < onCount ? ' on' : '') + '" data-i="' + i + '" cx="' + x + '" cy="' + y + '" r="3.4"/>';
+    }
+    return dots;
+  }
+
   function matchRingHtml(displayCount, displayPct){
-    var offset = (RING_C * (1 - displayPct)).toFixed(1);
+    var onCount = Math.round(displayPct * RING_TICKS);
     return '<div class="match-ring-row">' +
       '<div class="match-ring-wrap" id="matchRingWrap">' +
       '<div class="match-ring-radar" id="matchRingRadar1"></div>' +
       '<div class="match-ring-radar match-ring-radar-2" id="matchRingRadar2"></div>' +
       '<div class="match-ring-grid" id="matchRingGrid"></div>' +
-      '<svg class="match-ring-svg" viewBox="0 0 96 96">' +
-      '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--border)" stroke-width="6"/>' +
-      '<circle cx="48" cy="48" r="' + RING_R + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" ' +
-      'stroke-dasharray="' + RING_C.toFixed(1) + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 48 48)" id="matchRingArc"/>' +
+      '<svg class="match-ring-svg" viewBox="0 0 96 96" id="matchRingSvg">' +
+      ringDotsHtml(onCount) +
       '</svg>' +
-      '<div class="match-ring-center"><span class="match-ring-count" id="matchRingCount">' + displayCount + '</span></div>' +
+      '<div class="match-ring-center"><span class="match-ring-count" id="matchRingCount">' + (hasGivenInput ? displayCount : "") + '</span></div>' +
       '</div>' +
       '<div class="match-ring-copy"><p class="match-ring-sentence" id="matchRingSentence">' + matchSentence(displayCount) + '</p>' +
       '<div class="match-ring-micro" id="matchRingMicro">Berekenen&hellip;</div></div>' +
@@ -117,9 +130,16 @@
     return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
   }
 
+  function fillRingDots(pct){
+    var svg = document.getElementById("matchRingSvg");
+    if (!svg) return;
+    var on = Math.round(Math.max(0, Math.min(1, pct)) * RING_TICKS);
+    var dots = svg.querySelectorAll(".match-ring-dot");
+    for (var i = 0; i < dots.length; i++) dots[i].classList.toggle("on", i < on);
+  }
+
   function animateMatchRing(target){
     var countEl = document.getElementById("matchRingCount");
-    var arcEl = document.getElementById("matchRingArc");
     var wrapEl = document.getElementById("matchRingWrap");
     var sentenceEl = document.getElementById("matchRingSentence");
     var microEl = document.getElementById("matchRingMicro");
@@ -128,8 +148,12 @@
     var gridEl = document.getElementById("matchRingGrid");
     if (!countEl) return;
     if (sentenceEl) sentenceEl.innerHTML = matchSentence(target);
-    if (lastShownCount === null || lastShownCount === target) {
+    if (lastShownCount === null) {
       lastShownCount = target;
+      return;
+    }
+    hasGivenInput = true;
+    if (lastShownCount === target) {
       return;
     }
     var start = lastShownCount;
@@ -140,7 +164,7 @@
     var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) {
       countEl.textContent = target;
-      if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
+      fillRingDots(matchRingPct(target));
       return;
     }
     if (wrapEl) wrapEl.classList.add("calculating");
@@ -150,9 +174,10 @@
     if (gridEl) gridEl.classList.add("show");
     var panelEl = document.querySelector(".wizard-panel");
     if (panelEl) panelEl.classList.add("panel-calculating");
-    requestAnimationFrame(function(){
-      if (arcEl) arcEl.setAttribute("stroke-dashoffset", (RING_C * (1 - matchRingPct(target))).toFixed(1));
-    });
+    var rowWait = document.getElementById("statusRowWait");
+    var textWait = document.getElementById("statusTextWait");
+    if (rowWait) rowWait.classList.add("processing");
+    if (textWait) textWait.textContent = "Input verwerken…";
     var dur = 680, beginTs = null;
     function step(ts){
       if (!beginTs) beginTs = ts;
@@ -160,19 +185,57 @@
       var eased = easeOutBack(t);
       var v = Math.round(start + (target - start) * eased);
       countEl.textContent = Math.max(1, v);
+      fillRingDots(matchRingPct(Math.max(1, v)));
       if (t < 1) {
         requestAnimationFrame(step);
       } else {
         countEl.textContent = target;
+        fillRingDots(matchRingPct(target));
         if (wrapEl) wrapEl.classList.remove("calculating");
         if (microEl) microEl.classList.remove("show");
         if (radar1) radar1.classList.remove("go");
         if (radar2) radar2.classList.remove("go");
         if (gridEl) gridEl.classList.remove("show");
         if (panelEl) panelEl.classList.remove("panel-calculating");
+        if (rowWait) rowWait.classList.remove("processing");
+        if (textWait) textWait.textContent = "Laatste update: zojuist";
       }
     }
     requestAnimationFrame(step);
+  }
+
+  // Boot-sequence status stack: shown once above the matchring. Row 1 (Tool
+  // laden -> Tool online) plays once and then stays permanently green; row 2
+  // reflects whether the visitor has given input yet, and flips to "Input
+  // verwerken..." during a live recalculation (see animateMatchRing above).
+  function statusStackHtml(){
+    var showClass = bootDone ? " show" : "";
+    var onlineClass = bootDone ? " online" : "";
+    var bootText = bootDone ? "Tool online" : "Tool laden&hellip;";
+    var waitText = hasGivenInput ? "Laatste update: zojuist" : "Wachten op input&hellip;";
+    return '<div class="wizard-status-stack">' +
+      '<div class="wizard-status-row' + showClass + '" id="statusRowBoot"><span class="wizard-status-dot' + onlineClass + '" id="statusDotBoot"></span><span id="statusTextBoot">' + bootText + '</span></div>' +
+      '<div class="wizard-status-row' + showClass + '" id="statusRowWait"><span class="wizard-status-dot pulse" id="statusDotWait"></span><span id="statusTextWait">' + waitText + '</span></div>' +
+      '</div>';
+  }
+
+  function runBootSequence(){
+    if (bootDone) return;
+    var rowBoot = document.getElementById("statusRowBoot");
+    var dotBoot = document.getElementById("statusDotBoot");
+    var textBoot = document.getElementById("statusTextBoot");
+    var rowWait = document.getElementById("statusRowWait");
+    if (!rowBoot || !rowWait) return;
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      rowBoot.classList.add("show"); rowWait.classList.add("show");
+      dotBoot.classList.add("online"); textBoot.textContent = "Tool online";
+      bootDone = true;
+      return;
+    }
+    setTimeout(function(){ rowBoot.classList.add("show"); }, 30);
+    setTimeout(function(){ dotBoot.classList.add("online"); textBoot.textContent = "Tool online"; }, 680);
+    setTimeout(function(){ rowWait.classList.add("show"); bootDone = true; }, 1080);
   }
 
   function renderShell(inner){
@@ -187,6 +250,7 @@
       '<div class="wizard-top-row">' +
       (canBack ? '<button type="button" class="wizard-back" id="wizardBack"><span class="wizard-back-chevron">&#8249;</span>Vorige</button>' : '<span></span>') +
       '</div>' +
+      statusStackHtml() +
       matchRingHtml(initialCount, initialPct) +
       '<div id="wizardInner"></div>' +
       '</div>';
@@ -194,6 +258,7 @@
     if (canBack) {
       document.getElementById("wizardBack").onclick = function(){ state.step = Math.max(0, state.step-1); render(); };
     }
+    runBootSequence();
     animateMatchRing(target);
   }
 
@@ -589,12 +654,14 @@
       '</article>';
   }
 
-  function heroWhyText(p){
-    var onLabels = matchChecklist(p).filter(function(c){ return c.on; }).map(function(c){ return c.label; });
-    var reason = onLabels.length ?
-      "Dit " + onLabels.slice(0, 3).join(", ") + "." :
-      "Dit scoort goed op prijs en breed toepasbare kenmerken.";
-    return p.beschrijving + " " + reason;
+  var TICK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+
+  function heroPillsHtml(p){
+    var onItems = matchChecklist(p).filter(function(c){ return c.on; });
+    if (!onItems.length) return "";
+    return '<div class="hero-pills">' + onItems.map(function(c){
+      return '<span class="hero-pill on">' + TICK_SVG + c.label + '</span>';
+    }).join("") + '</div>';
   }
 
   function heroCardHtml(p, rank, pct, isTop){
@@ -602,7 +669,7 @@
       '<a class="shop-btn" href="' + p.affiliate_url + '" target="_blank" rel="noopener nofollow sponsored">Shop bij ICI Paris XL</a>' :
       '<button type="button" class="shop-btn shop-btn-empty" disabled>Geen prijs gevonden</button>';
     return '<div class="hero-row' + (isTop ? ' rank-top' : '') + '">' +
-      '<div class="hero-rank">' + (rank < 10 ? "0" + rank : rank) + '</div>' +
+      '<div class="hero-rank">' + (isTop ? "" : rank) + '</div>' +
       '<div class="hero-bottle-wrap">' +
       '<div class="hero-badge-pct"><span class="pct">' + pct + '%</span><span class="lbl">Match</span></div>' +
       '<div class="hero-bottle">' + bottleVisualHtml(p) + '</div>' +
@@ -611,7 +678,8 @@
       (isTop ? '<span class="hero-toplabel">Onze aanrader</span>' : '') +
       '<h3 class="hero-name">' + p.naam + '</h3>' +
       '<div class="hero-meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
-      '<p class="hero-why">' + heroWhyText(p) + '</p>' +
+      heroPillsHtml(p) +
+      '<p class="hero-why">' + p.beschrijving + '</p>' +
       '<div class="hero-actions">' + shopHtml + '<a class="details-mini" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details &rarr;</a></div>' +
       '</div>' +
       '</div>';
@@ -854,6 +922,7 @@
     state.step = 0;
     state.shown = [];
     lastShownCount = null;
+    hasGivenInput = false;
     try { history.pushState({}, "", location.pathname + location.hash); } catch (e) {}
     render();
     root.scrollIntoView({ behavior: "smooth", block: "start" });
