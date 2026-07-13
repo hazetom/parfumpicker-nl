@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-3"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-6"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -334,20 +334,22 @@ def wizard_data_scripts(base):
 <script src="{rel("/assets/js/wizard.js", base)}?v={ASSET_VERSION}" defer></script>'''
 
 def hero_engine_card_html(total):
-    """The homepage entry point: a compact 'live analysis' proof card that
-    expands in place into the real wizard on click (see engineExpand script
-    in build_homepage). The 3-step list beside it auto-cycles until then."""
+    """The homepage entry point: a compact 'live analysis' proof card that,
+    on click, hides and hands off to the real wizard in a plain sibling
+    host. The wizard/results DOM (which can end up thousands of px tall)
+    deliberately never lives inside the small animated/positioned proof
+    card - nesting arbitrarily tall content inside a box with its own
+    transition+shadow+radius made Chrome mis-paint (blank/duplicated)
+    content far down the page on scroll. The 3-step list auto-cycles
+    until expansion."""
     return f'''<div class="proof-row" id="proofRow">
   <div class="engine-card" id="engineCard">
-    <div class="engine-proof" id="engineProof">
-      <div class="engine-top"><span class="dot"></span>LIVE ANALYSE</div>
-      <div class="engine-mid">
-        <div class="radar"><span class="radar-ring"></span><span class="radar-ring r2"></span><div class="radar-core"><span>{total}</span></div></div>
-        <div class="engine-copy"><h3>ParfumPicker Tool</h3><p>Beantwoord 6 vragen en ontdek jouw match uit {total} parfums.</p></div>
-      </div>
-      <button type="button" class="engine-cta" id="engineCtaBtn">Start nu {icon('arrow')}</button>
+    <div class="engine-top"><span class="dot"></span>LIVE ANALYSE</div>
+    <div class="engine-mid">
+      <div class="radar"><span class="radar-ring"></span><span class="radar-ring r2"></span><div class="radar-core"><span>{total}</span></div></div>
+      <div class="engine-copy"><h3>ParfumPicker Tool</h3><p>Beantwoord 6 vragen en ontdek jouw match uit {total} parfums.</p></div>
     </div>
-    <div class="engine-wizard" id="engineWizard"><div id="wizardApp"></div></div>
+    <button type="button" class="engine-cta" id="engineCtaBtn">Start nu {icon('arrow')}</button>
   </div>
   <div class="steps-col" id="stepsCol">
     <div class="step-line" data-step="1"><span class="num mono">01</span><span class="txt">Beantwoord 6 gerichte vragen</span></div>
@@ -355,9 +357,12 @@ def hero_engine_card_html(total):
     <div class="step-line" data-step="3"><span class="num mono">03</span><span class="txt">Ontvang je persoonlijke top 3</span></div>
   </div>
 </div>
+<div class="wizard-host" id="wizardHost"><div id="wizardApp"></div></div>
 <script>
 (function(){{
+  var proofRow = document.getElementById('proofRow');
   var stepsCol = document.getElementById('stepsCol');
+  var wizardHost = document.getElementById('wizardHost');
   var card = document.getElementById('engineCard');
   var ctaBtn = document.getElementById('engineCtaBtn');
   var heroBtn = document.getElementById('heroStartBtn');
@@ -376,8 +381,8 @@ def hero_engine_card_html(total):
     if (expanded) return;
     expanded = true;
     if (timer) clearTimeout(timer);
-    if (stepsCol) stepsCol.classList.add('hidden');
-    if (card) card.classList.add('expanded');
+    if (proofRow) proofRow.style.display = 'none';
+    if (wizardHost) wizardHost.classList.add('show');
   }}
   if (card) card.addEventListener('click', function(){{ if (!expanded) expandToWizard(); }});
   if (ctaBtn) ctaBtn.addEventListener('click', function(e){{ e.stopPropagation(); expandToWizard(); }});
@@ -396,7 +401,6 @@ def build_homepage():
     cards = "\n".join(perfume_card_html(p, base, rank=idx+1) for idx, p in enumerate(top10))
     content = f'''
 <section class="hero" id="wizard">
-  <img class="hero-bg-bottle" src="{HERO_PHOTO}" alt="" aria-hidden="true">
   <div class="container">
     <h1>Zes vragen.<br>E&eacute;n <span class="fade">precieze</span> match.</h1>
     <div class="hero-sub">

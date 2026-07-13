@@ -973,10 +973,10 @@
     var sp = new URLSearchParams(location.search);
     var sharedCount = paramsToState(sp);
     if (sharedCount) {
-      var ec = document.getElementById("engineCard");
-      if (ec) ec.classList.add("expanded");
-      var sc = document.getElementById("stepsCol");
-      if (sc) sc.classList.add("hidden");
+      var pr = document.getElementById("proofRow");
+      if (pr) pr.style.display = "none";
+      var wh = document.getElementById("wizardHost");
+      if (wh) wh.classList.add("show");
       showResults(sharedCount);
     } else {
       render();
