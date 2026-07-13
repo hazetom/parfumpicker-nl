@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-6"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-7"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -333,23 +333,27 @@ def wizard_data_scripts(base):
     return f'''<script>window.PARFUM_DATA = {data_json};window.WIZARD_CONFIG = {cfg_json};</script>
 <script src="{rel("/assets/js/wizard.js", base)}?v={ASSET_VERSION}" defer></script>'''
 
-def hero_engine_card_html(total):
-    """The homepage entry point: a compact 'live analysis' proof card that,
-    on click, hides and hands off to the real wizard in a plain sibling
-    host. The wizard/results DOM (which can end up thousands of px tall)
-    deliberately never lives inside the small animated/positioned proof
-    card - nesting arbitrarily tall content inside a box with its own
-    transition+shadow+radius made Chrome mis-paint (blank/duplicated)
-    content far down the page on scroll. The 3-step list auto-cycles
+def hero_card_html(total):
+    """The homepage entry point: a compact proof card (a continuous, slow
+    emission of small 'scent molecules' that grow and fade as they drift -
+    literally how top notes diffuse) that, on click, hides and hands off to
+    the real wizard in a plain sibling host. The wizard/results DOM (which
+    can end up thousands of px tall) deliberately never lives inside the
+    small decorated proof card - nesting arbitrarily tall content inside a
+    box with its own transition+shadow+radius made Chrome mis-paint
+    (blank/duplicated) content far down the page on scroll. The reveal into
+    the wizard host is a single finite CSS @keyframes animation (never an
+    ongoing transition) for the same reason. The 3-step list auto-cycles
     until expansion."""
     return f'''<div class="proof-row" id="proofRow">
-  <div class="engine-card" id="engineCard">
-    <div class="engine-top"><span class="dot"></span>LIVE ANALYSE</div>
-    <div class="engine-mid">
-      <div class="radar"><span class="radar-ring"></span><span class="radar-ring r2"></span><div class="radar-core"><span>{total}</span></div></div>
-      <div class="engine-copy"><h3>ParfumPicker Tool</h3><p>Beantwoord 6 vragen en ontdek jouw match uit {total} parfums.</p></div>
+  <div class="card" id="engineCard">
+    <div class="card-text">
+      <div class="card-eyebrow"><span class="dot"></span>ParfumPicker Tool</div>
+      <h2>Geef een geur die &eacute;cht past, in <span class="accent">6 vragen</span>.</h2>
+      <p>Gratis, geen account &mdash; binnen 1 minuut een persoonlijk advies.</p>
+      <button type="button" class="card-cta" id="engineCtaBtn">Start nu {icon('arrow')}</button>
     </div>
-    <button type="button" class="engine-cta" id="engineCtaBtn">Start nu {icon('arrow')}</button>
+    <div class="card-viz"><svg id="molSvg" viewBox="0 0 260 300"></svg></div>
   </div>
   <div class="steps-col" id="stepsCol">
     <div class="step-line" data-step="1"><span class="num mono">01</span><span class="txt">Beantwoord 6 gerichte vragen</span></div>
@@ -367,6 +371,9 @@ def hero_engine_card_html(total):
   var ctaBtn = document.getElementById('engineCtaBtn');
   var heroBtn = document.getElementById('heroStartBtn');
   var expanded = false;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- 01/02/03 step list, auto-cycling until expansion ----
   var lines = stepsCol ? stepsCol.querySelectorAll('.step-line') : [];
   var idx = -1, timer = null;
   function cycle(){{
@@ -375,14 +382,109 @@ def hero_engine_card_html(total):
     if (idx < lines.length) lines[idx].classList.add('on');
     timer = setTimeout(cycle, idx < lines.length ? 1400 : 900);
   }}
-  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (lines.length && !reduceMotion) cycle();
+
+  // ---- Molecule diffusion illustration (vanilla JS + rAF, no new deps -
+  // mirrors the easeOutBack/rAF pattern already used for the match-ring
+  // counter in wizard.js). Small dots spawn near the text edge, grow and
+  // fade as they drift outward on a gently bowed path, then dissolve. ----
+  var svg = document.getElementById('molSvg');
+  if (svg) {{
+    var NS = "http://www.w3.org/2000/svg";
+    var ORIGIN = {{ x: 30, y: 240 }};
+    var PETROL = "2,95,97", PETROL_BRIGHT = "10,140,138";
+    function sineOut(t){{ return Math.sin(t * Math.PI/2); }}
+    function sineIn(t){{ return 1 - Math.cos(t * Math.PI/2); }}
+    function bigOrb(cx, cy, r, opacity, hue){{
+      var el = document.createElementNS(NS, "circle");
+      el.setAttribute("cx", cx); el.setAttribute("cy", cy); el.setAttribute("r", r);
+      el.setAttribute("fill", "rgba(" + hue + "," + opacity + ")");
+      svg.appendChild(el);
+    }}
+    bigOrb(185, 80, 72, 0.05, PETROL);
+    bigOrb(110, 200, 55, 0.045, PETROL_BRIGHT);
+
+    function spawnMolecule(){{
+      var angle = (-70 + Math.random()*50) * Math.PI/180;
+      var dist = 135 + Math.random()*100;
+      var bow = Math.random()*24 - 12;
+      var perp = angle + Math.PI/2;
+      var midX = ORIGIN.x + Math.cos(angle)*dist*0.5 + Math.cos(perp)*bow;
+      var midY = ORIGIN.y + Math.sin(angle)*dist*0.5 + Math.sin(perp)*bow;
+      var endX = ORIGIN.x + Math.cos(angle)*dist;
+      var endY = ORIGIN.y + Math.sin(angle)*dist;
+      var startR = 2 + Math.random()*1.5;
+      var midR = startR + (13-startR)*0.7;
+      var endR = 13 + Math.random()*18;
+      var life = (6500 + Math.random()*3500);
+      var startOpacity = 0.5 + Math.random()*0.15;
+      var color = Math.random() > 0.5 ? PETROL : PETROL_BRIGHT;
+
+      var el = document.createElementNS(NS, "circle");
+      el.setAttribute("cx", ORIGIN.x); el.setAttribute("cy", ORIGIN.y); el.setAttribute("r", startR);
+      el.setAttribute("fill", "rgba(" + color + "," + startOpacity + ")");
+      el.setAttribute("opacity", 0);
+      svg.appendChild(el);
+
+      var start = null;
+      function frame(ts){{
+        if (!start) start = ts;
+        var t = Math.min(1, (ts - start) / life);
+        var cx, cy, r;
+        if (t < 0.5) {{
+          var e = sineOut(t/0.5);
+          cx = ORIGIN.x + (midX-ORIGIN.x)*e; cy = ORIGIN.y + (midY-ORIGIN.y)*e; r = startR + (midR-startR)*e;
+        }} else {{
+          var e2 = sineIn((t-0.5)/0.5);
+          cx = midX + (endX-midX)*e2; cy = midY + (endY-midY)*e2; r = midR + (endR-midR)*e2;
+        }}
+        var opacity = startOpacity;
+        if (t < 0.12) opacity = startOpacity * sineOut(t/0.12);
+        else if (t > 0.65) opacity = startOpacity * (1 - sineIn(Math.min(1,(t-0.65)/0.35)));
+        el.setAttribute("cx", cx); el.setAttribute("cy", cy); el.setAttribute("r", r);
+        el.setAttribute("opacity", opacity);
+        if (t < 1) requestAnimationFrame(frame); else el.remove();
+      }}
+      requestAnimationFrame(frame);
+    }}
+
+    if (reduceMotion) {{
+      [[64,222,4],[100,186,7],[136,150,11],[168,116,15],[196,90,19]].forEach(function(p){{
+        var el = document.createElementNS(NS, "circle");
+        el.setAttribute("cx", p[0]); el.setAttribute("cy", p[1]); el.setAttribute("r", p[2]);
+        el.setAttribute("fill", "rgba(" + PETROL + "," + (0.5 - p[2]*0.015) + ")");
+        svg.appendChild(el);
+      }});
+    }} else {{
+      (function loop(){{
+        spawnMolecule();
+        setTimeout(loop, 700 + Math.random()*600);
+      }})();
+    }}
+  }}
+
+  // ---- Expand: fade the proof row out, reveal the wizard host with a
+  // single one-shot clip-path animation, then strip the animation so it
+  // never lingers once results push this host to thousands of px tall. ----
   function expandToWizard(){{
     if (expanded) return;
     expanded = true;
     if (timer) clearTimeout(timer);
-    if (proofRow) proofRow.style.display = 'none';
-    if (wizardHost) wizardHost.classList.add('show');
+    if (proofRow) {{
+      proofRow.classList.add('leaving');
+      setTimeout(function(){{ proofRow.style.display = 'none'; }}, reduceMotion ? 0 : 200);
+    }}
+    if (wizardHost) {{
+      wizardHost.classList.add('show');
+      if (!reduceMotion) {{
+        wizardHost.classList.add('revealing');
+        wizardHost.addEventListener('animationend', function done(){{
+          wizardHost.classList.remove('revealing');
+          wizardHost.style.animation = 'none';
+          wizardHost.removeEventListener('animationend', done);
+        }});
+      }}
+    }}
   }}
   if (card) card.addEventListener('click', function(){{ if (!expanded) expandToWizard(); }});
   if (ctaBtn) ctaBtn.addEventListener('click', function(e){{ e.stopPropagation(); expandToWizard(); }});
@@ -406,7 +508,7 @@ def build_homepage():
     <div class="hero-sub">
       <p class="lead">Geen giswerk. Ons algoritme weegt stijl, sillage en geurnoten tegen {total} parfums &mdash; jij krijgt een onderbouwd advies, geen toevalstreffer.</p>
     </div>
-    {hero_engine_card_html(total)}
+    {hero_card_html(total)}
   </div>
 </section>
 
