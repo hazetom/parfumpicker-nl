@@ -128,8 +128,8 @@ p{margin:0 0 1em}
    tall content lived inside it. See .wizard-host below - the reveal
    animation lives there and is a one-shot @keyframes, not an ongoing
    transition, for the same reason. */
-.proof-row{display:flex;gap:24px;margin-bottom:88px;align-items:stretch;transition:opacity .2s ease,transform .2s ease}
-.proof-row.leaving{opacity:0;transform:translateY(-6px);pointer-events:none}
+.proof-row{display:flex;gap:24px;margin-bottom:88px;align-items:stretch;transition:opacity 1.05s cubic-bezier(.22,.61,.36,1),transform 1.05s cubic-bezier(.22,.61,.36,1)}
+.proof-row.leaving{opacity:0;transform:scale(.985);pointer-events:none}
 @media(prefers-reduced-motion:reduce){.proof-row{transition:none}}
 
 .card{
@@ -156,10 +156,10 @@ p{margin:0 0 1em}
 .wizard-host{display:none;margin-bottom:88px}
 .wizard-host.show{display:block}
 @keyframes wizardReveal{
-  from{clip-path:inset(0 38% 0 38% round 20px);opacity:.4}
+  from{clip-path:inset(0 40% 0 40% round 20px);opacity:0}
   to{clip-path:inset(0 0 0 0 round 20px);opacity:1}
 }
-.wizard-host.revealing{animation:wizardReveal .65s cubic-bezier(.16,1,.3,1) both}
+.wizard-host.revealing{animation:wizardReveal 1.2s cubic-bezier(.22,.61,.36,1) both}
 @media(prefers-reduced-motion:reduce){.wizard-host.revealing{animation:none}}
 
 .steps-col{display:flex;flex-direction:column;justify-content:center;gap:0;padding-left:8px;overflow:hidden;flex-shrink:0;transition:opacity .4s ease,width .5s ease,margin .5s ease}

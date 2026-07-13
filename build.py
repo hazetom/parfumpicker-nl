@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-7"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-8"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -472,7 +472,7 @@ def hero_card_html(total):
     if (timer) clearTimeout(timer);
     if (proofRow) {{
       proofRow.classList.add('leaving');
-      setTimeout(function(){{ proofRow.style.display = 'none'; }}, reduceMotion ? 0 : 200);
+      setTimeout(function(){{ proofRow.style.display = 'none'; }}, reduceMotion ? 0 : 1050);
     }}
     if (wizardHost) {{
       wizardHost.classList.add('show');
