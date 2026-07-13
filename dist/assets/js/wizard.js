@@ -5,7 +5,7 @@
   var PERSONALITY_OPTIONS = ["gedurfd","zelfverzekerd","stoer","warm","fris","klassiek","modern","elegant","verfijnd","mysterieus","sportief","speels"];
   var AUTO_ADVANCE_DELAY = 220;
   var MAX_SHOWN = 12;
-  var RESULTS_PER_PAGE = 4;
+  var RESULTS_PER_PAGE = 6;
 
   var SILLAGE_OPTIONS = [
     {v:"subtiel", l:"Liever subtiel", match:["licht","intiem"]},
@@ -691,7 +691,7 @@
       '<div class="bottle">' + bottleVisualHtml(p) + '</div>' +
       '<h3>' + p.naam + '</h3><div class="meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
       '<p>' + p.beschrijving + '</p>' +
-      '<button type="button" class="why-toggle">Waarom dit past<span class="why-car">&rsaquo;</span></button>' +
+      '<button type="button" class="why-toggle">Waarom goede match?<span class="why-car">&rsaquo;</span></button>' +
       '<ul class="why-list">' + whyItems + '</ul>' +
       '<a class="details-link" style="margin-top:10px" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details →</a>' +
       '</article>';
@@ -886,22 +886,20 @@
     var canShowMore = remaining.length > 0 && state.shown.length < MAX_SHOWN;
     var moreTile = canShowMore ?
       '<button type="button" class="show-more-tile" id="meerBtn"><span class="show-more-plus">+</span>Laat meer zien</button>' : '';
-    var gridHtml = (restItems.length || canShowMore) ?
-      '<div class="more-section container" style="max-width:920px;margin:20px auto">' +
-      '<h3 class="results-section-heading">Meer aanbevelingen</h3>' +
-      '<div class="perfume-grid" id="resultsGrid">' + restCards + moreTile + '</div>' +
-      '</div>' : '';
+    var moreSectionHtml = (restItems.length || canShowMore) ?
+      '<h3 class="results-section-heading results-section-heading-more">Meer aanbevelingen</h3>' +
+      '<div class="perfume-grid" id="resultsGrid">' + restCards + moreTile + '</div>' : '';
 
     root.innerHTML =
       '<div class="results-summary container" style="max-width:920px;margin:0 auto">' +
-      '<h2 style="font-size:24px">Jouw persoonlijke aanbevelingen</h2>' +
+      '<h1 class="results-title">Uitslag ParfumPicker</h1>' +
       '<p class="sub" style="margin-bottom:0">Gebaseerd op jouw antwoorden &middot; 100% gratis &middot; We sturen op match, niet op populariteit.</p>' +
       '</div>' +
       '<div class="hero-list container" style="max-width:920px;margin:20px auto 0" id="heroList">' +
       '<h3 class="results-section-heading">Jouw gepersonaliseerde Top 3</h3>' +
       '<div class="hero-rows-wrap">' + heroHtml + '</div>' +
+      moreSectionHtml +
       '</div>' +
-      gridHtml +
       '<div class="container" style="max-width:920px;margin:30px auto;display:flex;justify-content:center">' +
       '<div class="ad-unit ad-unit-leaderboard" aria-hidden="true"><span>Advertentie</span><span class="ad-unit-size">728&times;90</span></div>' +
       '</div>' +

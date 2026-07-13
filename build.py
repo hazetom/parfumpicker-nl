@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-2"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-3"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -291,6 +291,24 @@ def steps_html():
   <p class="steps-prose">Je beantwoordt een paar simpele vragen: voor wie je een parfum zoekt en hoe je die persoon zou omschrijven. Ken je al een merk dat diegene mooi vindt? Dan vullen we dat aan met details over hoe opvallend de geur mag zijn, wanneer hij gedragen wordt en je budget. Binnen een minuut zetten we al je antwoorden om in persoonlijk parfumadvies, m&eacute;t een duidelijke uitleg waarom elke geur past.</p>
 </section>'''
 
+def explainer_html(base):
+    return f'''<section class="explainer container" id="hoe-werkt-het">
+  <div class="explainer-grid">
+    <div class="explainer-col">
+      <h2>Zo werkt de wizard</h2>
+      <p class="explainer-prose">Je beantwoordt een paar simpele vragen: voor wie je een parfum zoekt en hoe je die persoon zou omschrijven. Ken je al een merk dat diegene mooi vindt? Dan vullen we dat aan met details over hoe opvallend de geur mag zijn, wanneer hij gedragen wordt en je budget. Binnen een minuut zetten we al je antwoorden om in persoonlijk parfumadvies, m&eacute;t een duidelijke uitleg waarom elke geur past.</p>
+    </div>
+    <div class="explainer-col">
+      <h2>Liever meteen een populaire aanrader?</h2>
+      <p class="explainer-prose">Geen zin in vragen en gewoon een topper scoren? We hebben ook kant-en-klare lijstjes: van de tien meest gedragen geuren tot verrassende toppers die niet iedereen draagt.</p>
+      <div class="explainer-cta-row">
+        <a href="{rel("/#top10", base)}" class="btn btn-outline">Top 10 geuren</a>
+        <a href="{rel("/cadeau-inspiratie/", base)}" class="btn btn-outline">Alle toplijstjes</a>
+      </div>
+    </div>
+  </div>
+</section>'''
+
 def perfume_card_html(p, base, rank=None, badge=None):
     rank_html = f'<div class="rank{" top" if rank == 1 else ""}">{rank}</div>' if rank else ""
     badge_html = f'<div class="badge">{esc(badge)}</div>' if badge else ""
@@ -378,16 +396,11 @@ def build_homepage():
     cards = "\n".join(perfume_card_html(p, base, rank=idx+1) for idx, p in enumerate(top10))
     content = f'''
 <section class="hero" id="wizard">
+  <img class="hero-bg-bottle" src="{HERO_PHOTO}" alt="" aria-hidden="true">
   <div class="container">
     <h1>Zes vragen.<br>E&eacute;n <span class="fade">precieze</span> match.</h1>
     <div class="hero-sub">
       <p class="lead">Geen giswerk. Ons algoritme weegt stijl, sillage en geurnoten tegen {total} parfums &mdash; jij krijgt een onderbouwd advies, geen toevalstreffer.</p>
-      <div class="hero-cta">
-        <div>
-          <button type="button" class="btn btn-primary" id="heroStartBtn">Start de wizard {icon('arrow')}</button>
-          <div class="hero-cta-sub">GEEN ACCOUNT NODIG</div>
-        </div>
-      </div>
     </div>
     {hero_engine_card_html(total)}
   </div>
@@ -397,7 +410,7 @@ def build_homepage():
 
 {trust_row_html()}
 
-{steps_html()}
+{explainer_html(base)}
 
 <section class="section" id="top10">
   <div class="container">
