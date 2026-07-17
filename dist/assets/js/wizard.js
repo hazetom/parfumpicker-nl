@@ -324,6 +324,47 @@
     });
   }
 
+  // Measures the track once per drag (its size can't change mid-drag) and
+  // coalesces painting to one requestAnimationFrame per frame, always using
+  // the latest pointer position - raw pointermove can fire faster than the
+  // display repaints, and calling getBoundingClientRect() (a forced
+  // synchronous layout flush) on every single one of those events is what
+  // makes a drag feel like it's lagging behind the real cursor.
+  function makeDraggableSlider(trackEl, onMove, onEnd){
+    var dragging = false, rect = null, pendingPct = null, rafId = null;
+    function pctFromClientX(clientX){
+      var pct = (clientX - rect.left) / rect.width * 100;
+      return Math.max(0, Math.min(100, pct));
+    }
+    function flush(){
+      rafId = null;
+      if (pendingPct !== null) { onMove(pendingPct); pendingPct = null; }
+    }
+    function schedule(pct){
+      pendingPct = pct;
+      if (rafId === null) rafId = requestAnimationFrame(flush);
+    }
+    function down(e){
+      dragging = true;
+      rect = trackEl.getBoundingClientRect();
+      schedule(pctFromClientX(e.clientX));
+      e.preventDefault();
+    }
+    function move(e){
+      if (!dragging) return;
+      schedule(pctFromClientX(e.clientX));
+    }
+    function up(){
+      if (!dragging) return;
+      dragging = false;
+      if (rafId !== null) { cancelAnimationFrame(rafId); flush(); }
+      onEnd();
+    }
+    trackEl.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  }
+
   function genderIconHtml(key){
     if (key === "unisex") return UNISEX_ICON;
     var wantId = key === "heren" ? "dior-sauvage-edt" : "chanel-coco-mademoiselle-edp";
@@ -350,24 +391,145 @@
     navForward(!!state.geslacht, "Volgende", goNext);
   }
 
-  var SILLAGE_ICONS = {
-    subtiel: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8c0 6-5 9-5 13-4-2-7-5-7-9a7 7 0 0 1 12-5 6 6 0 0 1-3 8"/></svg>',
-    gemiddeld: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/><path d="M2 17c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/></svg>',
-    opvallend: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
-    geen_voorkeur: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12a3 3 0 1 0 6 0 3 3 0 1 0 6 0 3 3 0 1 0-6 0 3 3 0 1 0-6 0Z"/></svg>'
+  // The 3 ordered SILLAGE_OPTIONS buckets, expressed as ranges along a 0-100
+  // slider so the drag can feel continuous while still landing on exactly
+  // the same 3 values the matching engine already understands.
+  var SILLAGE_BUCKETS = [
+    {v:"subtiel", l:"Subtiel", from:0, to:100/3},
+    {v:"gemiddeld", l:"Gemiddeld", from:100/3, to:200/3},
+    {v:"opvallend", l:"Opvallend", from:200/3, to:100}
+  ];
+  function sillageBucketForPct(pct){
+    for (var i=0;i<SILLAGE_BUCKETS.length;i++) if (pct <= SILLAGE_BUCKETS[i].to) return SILLAGE_BUCKETS[i];
+    return SILLAGE_BUCKETS[SILLAGE_BUCKETS.length-1];
+  }
+  function sillageSnapCenter(b){ return (b.from + b.to) / 2; }
+  function sillagePctForValue(v){
+    var b = SILLAGE_BUCKETS.filter(function(x){ return x.v === v; })[0];
+    return b ? sillageSnapCenter(b) : 50;
+  }
+
+  var SILLAGE_BOTTLE_ICON = '<svg class="sillage-wave-bottle" viewBox="0 0 24 32" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v4.5c0 .8-.4 1.3-1 1.8-1.6 1.3-3 2.7-3 5.2v13c0 1.4 1.1 2.5 2.5 2.5h7c1.4 0 2.5-1.1 2.5-2.5v-13c0-2.5-1.4-3.9-3-5.2-.6-.5-1-1-1-1.8V3"/></svg>';
+  var SILLAGE_TICK_ICONS = {
+    subtiel: '<svg viewBox="0 0 24 24"><path d="M12 5c-2 3-2 6 0 9"/></svg>',
+    gemiddeld: '<svg viewBox="0 0 24 24"><path d="M9 5c-2.5 3.3-2.5 6.7 0 10"/><path d="M14 5c-2.5 3.3-2.5 6.7 0 10"/></svg>',
+    opvallend: '<svg viewBox="0 0 24 24"><path d="M6 4c-3 4-3 8 0 12"/><path d="M11 4c-3 4-3 8 0 12"/><path d="M16 4c-3 4-3 8 0 12"/></svg>'
   };
 
   function renderStepSillage(){
-    renderShell('<span class="wizard-question">Hoe subtiel of opvallend mag de geur zijn?</span><p class="wizard-hint">Dit bepaalt de sterkte (sillage) van het parfum.</p><div class="option-row-list" id="opts"></div>');
-    var opts = document.getElementById("opts");
-    SILLAGE_OPTIONS.forEach(function(o){
-      opts.appendChild(optionRow(SILLAGE_ICONS[o.v] || "", o.l, state.sillage===o.v, function(){
-        state.sillage = o.v;
-        renderStepSillage();
-        setTimeout(goNext, AUTO_ADVANCE_DELAY);
-      }));
+    // A slider always shows a resting position, so treat "never touched" as
+    // an implicit choice of the middle bucket rather than leaving state.sillage
+    // null while the handle visually sits on "Gemiddeld" - otherwise the UI
+    // would imply a filter that isn't actually being applied.
+    if (state.sillage === null) state.sillage = "gemiddeld";
+    var skipped = state.sillage === "geen_voorkeur";
+
+    renderShell(
+      '<span class="wizard-question">Hoe subtiel of opvallend mag de geur zijn?</span>' +
+      '<p class="wizard-hint">Dit bepaalt de sterkte (sillage) van het parfum.</p>' +
+      '<div class="sillage-wave-stage">' + SILLAGE_BOTTLE_ICON +
+        '<svg class="sillage-wave-svg" viewBox="0 0 220 92" preserveAspectRatio="xMinYMid meet">' +
+          '<path class="sillage-wave-arc" id="sillageWave1" d="M14,32 A14,14 0 0 1 14,60"/>' +
+          '<path class="sillage-wave-arc" id="sillageWave2" d="M14,18 A28,28 0 0 1 14,74"/>' +
+          '<path class="sillage-wave-arc" id="sillageWave3" d="M14,4 A42,42 0 0 1 14,88"/>' +
+          '<path class="sillage-wave-arc" id="sillageWave4" d="M14,-10 A56,56 0 0 1 14,102"/>' +
+        '</svg>' +
+      '</div>' +
+      '<div class="sillage-slider-wrap" id="sillageSliderWrap">' +
+        '<div class="sillage-slider-bubble" id="sillageBubble"></div>' +
+        '<div class="sillage-slider-track" id="sillageTrack">' +
+          '<div class="sillage-slider-fill" id="sillageFill"></div>' +
+          '<div class="sillage-slider-handle" id="sillageHandle" tabindex="0" role="slider" aria-valuemin="0" aria-valuemax="100" aria-label="Sillage"></div>' +
+        '</div>' +
+        '<div class="sillage-wave-ticks" id="sillageTicks">' +
+          '<span data-b="subtiel">' + SILLAGE_TICK_ICONS.subtiel + 'Subtiel</span>' +
+          '<span data-b="gemiddeld">' + SILLAGE_TICK_ICONS.gemiddeld + 'Gemiddeld</span>' +
+          '<span data-b="opvallend">' + SILLAGE_TICK_ICONS.opvallend + 'Opvallend</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:22px"><button type="button" class="skip-link' + (skipped ? " active" : "") + '" id="sillageSkip">Maakt me niet uit &mdash; sla deze vraag over</button></div>'
+    );
+
+    var track = document.getElementById("sillageTrack");
+    var fill = document.getElementById("sillageFill");
+    var handle = document.getElementById("sillageHandle");
+    var bubble = document.getElementById("sillageBubble");
+    var ticks = document.querySelectorAll("#sillageTicks span");
+    var waves = [document.getElementById("sillageWave1"), document.getElementById("sillageWave2"), document.getElementById("sillageWave3"), document.getElementById("sillageWave4")];
+    var wrap = document.getElementById("sillageSliderWrap");
+    var skipBtn = document.getElementById("sillageSkip");
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function paintWaves(pct){
+      var level = pct / 100 * waves.length;
+      waves.forEach(function(w, i){
+        var local = Math.max(0, Math.min(1, level - i));
+        w.style.opacity = local * 0.75;
+        w.style.strokeWidth = 1.4 + local * 1.4;
+      });
+    }
+    function paint(pct, snapping){
+      track.dataset.pct = pct;
+      fill.style.width = pct + "%";
+      handle.style.left = pct + "%";
+      bubble.style.left = pct + "%";
+      handle.classList.toggle("snap", !reduceMotion && !!snapping);
+      paintWaves(pct);
+      var b = sillageBucketForPct(pct);
+      bubble.textContent = b.l;
+      Array.prototype.forEach.call(ticks, function(t){ t.classList.toggle("on", t.getAttribute("data-b") === b.v); });
+    }
+    function setSkippedVisual(skip){
+      wrap.style.opacity = skip ? ".35" : "1";
+      wrap.style.pointerEvents = skip ? "none" : "";
+    }
+    function commit(v){
+      if (state.sillage === v) return;
+      state.sillage = v;
+      animateMatchRing(liveMatchCount());
+    }
+
+    paint(sillagePctForValue(skipped ? "gemiddeld" : state.sillage), false);
+    setSkippedVisual(skipped);
+
+    makeDraggableSlider(track, function(pct){
+      if (state.sillage === "geen_voorkeur") return;
+      paint(pct, false);
+    }, function(){
+      if (state.sillage === "geen_voorkeur") return;
+      var b = sillageBucketForPct(parseFloat(track.dataset.pct));
+      paint(sillageSnapCenter(b), true);
+      commit(b.v);
     });
-    staggerGrid(opts);
+
+    // Keyboard: step directly to the adjacent bucket rather than nudging by
+    // a few percent - a percent-nudge from a bucket's own center (the
+    // resting position) lands back inside the same bucket, so reusing the
+    // drag-release snap would silently cancel every keypress out.
+    handle.addEventListener("keydown", function(e){
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      if (state.sillage === "geen_voorkeur") return;
+      var idx = SILLAGE_BUCKETS.indexOf(sillageBucketForPct(parseFloat(track.dataset.pct)));
+      var next = Math.max(0, Math.min(SILLAGE_BUCKETS.length - 1, idx + (e.key === "ArrowLeft" ? -1 : 1)));
+      var b = SILLAGE_BUCKETS[next];
+      paint(sillageSnapCenter(b), true);
+      commit(b.v);
+    });
+
+    skipBtn.onclick = function(){
+      var willSkip = state.sillage !== "geen_voorkeur";
+      if (willSkip) {
+        commit("geen_voorkeur");
+      } else {
+        commit("gemiddeld");
+        paint(sillagePctForValue("gemiddeld"), true);
+      }
+      skipBtn.classList.toggle("active", willSkip);
+      setSkippedVisual(willSkip);
+    };
+
+    navForward(true, "Volgende", goNext);
   }
 
   function renderStepBekend(){

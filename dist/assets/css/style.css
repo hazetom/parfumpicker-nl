@@ -331,6 +331,37 @@ p{margin:0 0 1em}
 .option-row.selected .option-row-chevron{background:var(--accent);color:#fff}
 @media(prefers-reduced-motion:reduce){.option-row{animation:none;opacity:1}}
 
+/* Sillage slider: a continuous-feeling drag that still snaps to the same 3
+   buckets the matching engine already understands (subtiel/gemiddeld/
+   opvallend). The wave visual ties the control to the actual subject
+   (scent spreading outward) instead of being a generic range input - the
+   same "ground it in the subject" idea as the homepage's molecule motif. */
+.sillage-wave-stage{display:flex;align-items:center;gap:0;height:80px;margin-bottom:6px}
+.sillage-wave-bottle{flex:none;width:30px;height:44px;stroke:var(--ink)}
+.sillage-wave-svg{flex:1;height:80px;overflow:visible}
+.sillage-wave-arc{fill:none;stroke:var(--accent);stroke-width:2;opacity:0;transition:opacity .15s ease,stroke-width .15s ease}
+@media(prefers-reduced-motion:reduce){.sillage-wave-arc{transition:none}}
+
+.sillage-slider-wrap{position:relative;padding-top:52px;transition:opacity .2s ease}
+.sillage-slider-bubble{position:absolute;top:0;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:7px 13px;border-radius:8px;white-space:nowrap;pointer-events:none}
+.sillage-slider-bubble::after{content:"";position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:var(--ink);transform:translateX(-50%) rotate(45deg)}
+.sillage-slider-track{position:relative;height:6px;border-radius:3px;background:var(--border);cursor:pointer;touch-action:none}
+.sillage-slider-fill{position:absolute;top:0;left:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--gold))}
+.sillage-slider-handle{position:absolute;top:50%;left:50%;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 2px 8px rgba(6,32,31,.18);transform:translate(-50%,-50%);cursor:grab}
+.sillage-slider-handle:active{cursor:grabbing}
+.sillage-slider-handle.snap{transition:left .38s cubic-bezier(.16,1,.3,1)}
+.sillage-slider-handle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.sillage-slider-handle.snap{transition:none}}
+
+.sillage-wave-ticks{display:flex;justify-content:space-between;margin-top:10px}
+.sillage-wave-ticks span{font-size:13px;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.sillage-wave-ticks span.on{color:var(--accent-dark)}
+.sillage-wave-ticks svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+.skip-link{background:none;border:0;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text-muted);cursor:pointer;padding:4px 0}
+.skip-link:hover{color:var(--accent-dark)}
+.skip-link.active{color:var(--accent-dark)}
+
 /* Step transitions */
 #wizardInner{animation:wizardStepIn .35s cubic-bezier(.16,1,.3,1)}
 @keyframes wizardStepIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
