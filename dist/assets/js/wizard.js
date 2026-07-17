@@ -849,6 +849,12 @@
     ];
   }
 
+  function shopBtnHtml(p){
+    return p.affiliate_url ?
+      '<a class="shop-btn" href="' + p.affiliate_url + '" target="_blank" rel="noopener nofollow sponsored">Shop bij ICI Paris XL</a>' :
+      '<button type="button" class="shop-btn shop-btn-empty" disabled>Geen prijs gevonden</button>';
+  }
+
   function cardHtml(p, badge, pct){
     var whyItems = matchChecklist(p).map(function(c){
       return '<li class="' + (c.on ? "match" : "") + '"><span class="tick">' + (c.on ? "&#10003;" : "") + '</span>' + c.label + '</li>';
@@ -859,10 +865,85 @@
       '<div class="bottle">' + bottleVisualHtml(p) + '</div>' +
       '<h3>' + p.naam + '</h3><div class="meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
       '<p>' + p.beschrijving + '</p>' +
+      shopBtnHtml(p) +
+      '<div class="card-actions-row">' +
       '<button type="button" class="why-toggle">Waarom goede match?<span class="why-car">&rsaquo;</span></button>' +
+      '<a class="details-link" href="' + CFG.parfumBase + p.id + '/index.html" data-id="' + p.id + '">Bekijk details<span class="why-car">&rsaquo;</span></a>' +
+      '</div>' +
       '<ul class="why-list">' + whyItems + '</ul>' +
-      '<a class="details-link" style="margin-top:10px" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details →</a>' +
       '</article>';
+  }
+
+  function capitalize(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function tagListHtml(items){
+    return (items||[]).map(function(t){ return '<span class="tag">' + t + '</span>'; }).join("");
+  }
+
+  // Mirrors build_perfume_page()'s spec_items/notes_html in build.py, so the
+  // modal shows the exact same facts as the standalone product page.
+  function detailModalContentHtml(p){
+    var whyItems = matchChecklist(p).map(function(c){
+      return '<li class="' + (c.on ? "match" : "") + '"><span class="tick">' + (c.on ? "&#10003;" : "") + '</span>' + c.label + '</li>';
+    }).join("");
+    var specs = [
+      ["Merk", p.merk], ["Jaar", p.jaar], ["Concentratie", p.concentratie],
+      ["Geurfamilie", p.familie_hoofd + " &middot; " + p.familie_sub],
+      ["Longevity", capitalize(p.longevity)], ["Sillage", capitalize(p.sillage)],
+      ["Prijsklasse", p.prijsklasse], ["Geslacht", capitalize(p.geslacht)],
+      ["Seizoen", capitalize((p.seizoen||[]).join(", "))]
+    ].map(function(kv){
+      return '<div class="spec-item"><div class="k">' + kv[0] + '</div><div class="v">' + kv[1] + '</div></div>';
+    }).join("");
+    var notes = [["noten_top","Topnoten"],["noten_hart","Hartnoten"],["noten_basis","Basisnoten"]].map(function(kv){
+      var vals = p[kv[0]] || [];
+      return '<div><h4>' + kv[1] + '</h4><p>' + (vals.length ? vals.join(", ") : "n.v.t.") + '</p></div>';
+    }).join("");
+    return '<button type="button" class="detail-modal-close" id="detailModalClose" aria-label="Sluiten">&times;</button>' +
+      '<div class="detail-modal-grid">' +
+      '<div class="detail-modal-photo">' + bottleVisualHtml(p, 220, 280) + '</div>' +
+      '<div>' +
+      '<div class="detail-modal-eyebrow">' + p.merk + '</div>' +
+      '<h3 class="detail-modal-title">' + p.naam + '</h3>' +
+      '<p class="detail-modal-lead">' + p.beschrijving + '</p>' +
+      '<ul class="detail-modal-checklist">' + whyItems + '</ul>' +
+      shopBtnHtml(p) +
+      '</div>' +
+      '</div>' +
+      '<div class="spec-grid">' + specs + '</div>' +
+      '<div class="note-cols">' + notes + '</div>' +
+      '<div>' + tagListHtml(p.persoonlijkheid) + '</div>' +
+      '<div class="detail-modal-fullpage"><a href="' + CFG.parfumBase + p.id + '/index.html">Volledige productpagina &rsaquo;</a></div>';
+  }
+
+  var detailModalOverlay = null;
+
+  function ensureDetailModal(){
+    if (detailModalOverlay) return detailModalOverlay;
+    var overlay = document.createElement("div");
+    overlay.className = "detail-modal-overlay";
+    overlay.innerHTML = '<div class="detail-modal-panel" id="detailModalPanel"></div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function(e){ if (e.target === overlay) closeDetailModal(); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeDetailModal(); });
+    detailModalOverlay = overlay;
+    return overlay;
+  }
+
+  function openDetailModal(id){
+    var p = DATA.filter(function(x){ return x.id === id; })[0];
+    if (!p) return;
+    var overlay = ensureDetailModal();
+    document.getElementById("detailModalPanel").innerHTML = detailModalContentHtml(p);
+    document.getElementById("detailModalClose").onclick = closeDetailModal;
+    overlay.classList.add("show");
+    document.body.classList.add("modal-open");
+  }
+
+  function closeDetailModal(){
+    if (!detailModalOverlay) return;
+    detailModalOverlay.classList.remove("show");
+    document.body.classList.remove("modal-open");
   }
 
   var TICK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
@@ -1083,10 +1164,19 @@
       staggerGrid(grid);
       grid.addEventListener("click", function(e){
         var btn = e.target.closest(".why-toggle");
-        if (!btn) return;
-        btn.classList.toggle("open");
-        var list = btn.nextElementSibling;
-        if (list) list.classList.toggle("open");
+        if (btn) {
+          btn.classList.toggle("open");
+          var row = btn.closest(".card-actions-row");
+          var list = row ? row.nextElementSibling : null;
+          if (list) list.classList.toggle("open");
+          return;
+        }
+        var link = e.target.closest(".details-link");
+        if (link) {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          openDetailModal(link.getAttribute("data-id"));
+        }
       });
     }
 
