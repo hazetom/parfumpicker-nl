@@ -46,7 +46,8 @@
 
   var root = document.getElementById("wizardApp");
   var DATA = [];
-  var CFG = window.WIZARD_CONFIG || { parfumBase: "../parfums/" };
+  var CFG = window.WIZARD_CONFIG || { parfumBase: "../parfums/", assetBase: "../assets/img/" };
+  var FALLBACK_PHOTO = { heren: "fallback-heren.jpg", dames: "fallback-dames.jpg" };
 
   function fetchData(){
     // Dataset wordt inline meegeleverd door build.py (window.PARFUM_DATA) i.p.v. via fetch(),
@@ -827,6 +828,11 @@
   function bottleVisualHtml(p, w, h){
     if (p.afbeelding_url) {
       return '<img class="bottle-photo" src="' + p.afbeelding_url + '" alt="' + p.naam + '" loading="lazy">';
+    }
+    var fallback = FALLBACK_PHOTO[p.geslacht];
+    if (fallback) {
+      return '<img class="bottle-photo bottle-photo-fallback" src="' + CFG.assetBase + fallback + '" alt="' + p.naam + '" loading="lazy">' +
+        '<span class="photo-label">Geen productfoto gevonden</span>';
     }
     return bottleSvg(p.familie_hoofd, p.id, w, h);
   }

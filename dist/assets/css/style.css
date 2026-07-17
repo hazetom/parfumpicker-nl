@@ -434,6 +434,10 @@ p{margin:0 0 1em}
 .bottle .bottle-photo{width:100%;height:100%;object-fit:contain;padding:6px}
 /* Teal colour-wash only applies over a real photo, never over the illustrations */
 .bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.20),rgba(1,25,25,.04) 60%);mix-blend-mode:multiply;pointer-events:none}
+/* Generic fallback photo: no colour-wash (it isn't a photo of this bottle,
+   don't dress it as one) and an explicit label instead */
+.bottle:has(.bottle-photo-fallback)::after{display:none}
+.bottle .photo-label{position:absolute;left:6px;right:6px;bottom:6px;z-index:2;background:rgba(6,32,31,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:#fff;font-size:9.5px;font-weight:600;text-align:center;padding:4px 5px;border-radius:6px;letter-spacing:.01em}
 .perfume-card h3{font-size:16px;margin-bottom:2px}
 .perfume-card .meta{font-size:12.5px;color:var(--text-muted);margin-bottom:6px}
 .perfume-card p{font-size:13px;color:var(--text-muted);margin-bottom:10px;min-height:34px}
@@ -462,6 +466,8 @@ h1.results-title{font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-
 .hero-bottle .bottle-photo{width:100%;height:100%;object-fit:contain;padding:10px}
 .hero-bottle:has(.bottle-photo){position:relative}
 .hero-bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.12),rgba(1,25,25,.02) 60%);mix-blend-mode:multiply;pointer-events:none}
+.hero-bottle:has(.bottle-photo-fallback)::after{display:none}
+.hero-bottle .photo-label{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;background:rgba(6,32,31,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:#fff;font-size:11px;font-weight:600;text-align:center;padding:6px 8px;border-radius:8px;letter-spacing:.01em}
 .hero-badge-pct{position:absolute;top:16px;left:-10px;z-index:2;background:rgba(2,95,97,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   color:#fff;border-radius:10px;padding:6px 11px;box-shadow:0 4px 14px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.15)}
 .hero-row.rank-top .hero-badge-pct{background:rgba(184,132,42,.92)}
@@ -552,6 +558,8 @@ h1.results-title{font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-
 .pd-bottle svg{max-height:80%;width:auto}
 .pd-bottle .bottle-photo{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .pd-bottle:has(.bottle-photo)::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(2,95,97,.24),rgba(1,25,25,.05) 60%);mix-blend-mode:multiply;pointer-events:none}
+.pd-bottle:has(.bottle-photo-fallback)::after{display:none}
+.pd-bottle .photo-label{position:absolute;left:16px;right:16px;bottom:16px;z-index:2;background:rgba(6,32,31,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:#fff;font-size:12.5px;font-weight:600;text-align:center;padding:8px 10px;border-radius:9px;letter-spacing:.01em}
 .tag{display:inline-block;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;background:var(--accent-light);color:var(--accent-dark);margin:0 6px 6px 0}
 .spec-grid{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);margin:22px 0}
 @media(min-width:640px){.spec-grid{grid-template-columns:repeat(3,1fr)}}

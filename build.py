@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-12"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-13"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -135,14 +135,26 @@ def bottle_svg(familie_hoofd="Fris", id_seed="", w=140, h=180):
         label = f'<rect x="26" y="70" width="60" height="50" rx="4" fill="#FDFCFB" opacity=".78"/><rect x="32" y="82" width="48" height="4" rx="2" fill="{dark}" opacity=".55"/><rect x="32" y="92" width="34" height="4" rx="2" fill="{dark}" opacity=".35"/>'
     return f'<svg viewBox="0 0 140 180" width="{w}" height="{h}" xmlns="http://www.w3.org/2000/svg">{cap}{body}{label}</svg>'
 
-def bottle_visual_html(p, w=140, h=180):
+# Generic (non-brand-specific) product photos for heren/dames, shown with an
+# explicit "Geen productfoto gevonden" label so it never reads as a photo of
+# the specific bottle - chosen over the abstract SVG illustration because
+# user testing (3 mockups) preferred a real bottle silhouette over an
+# invented shape. No unisex photo exists, so unisex still falls back to the
+# SVG illustration below.
+FALLBACK_PHOTO = {"heren": "/assets/img/fallback-heren.jpg", "dames": "/assets/img/fallback-dames.jpg"}
+
+def bottle_visual_html(p, w=140, h=180, base=""):
     """Product visual for one specific perfume. Uses a real affiliate product
     photo once p['afbeelding_url'] is set (see data/parfums.jsonl); until then,
-    falls back to the illustration, never a generic stock photo (that would
-    misrepresent a specific named product)."""
+    a generic gendered fallback photo (explicitly labeled - see FALLBACK_PHOTO)
+    for heren/dames, or the illustration for unisex."""
     url = p.get("afbeelding_url")
     if url:
         return f'<img class="bottle-photo" src="{esc(url)}" alt="{esc(p["naam"])}" loading="lazy" width="{w}" height="{h}">'
+    fallback = FALLBACK_PHOTO.get(p.get("geslacht"))
+    if fallback:
+        return (f'<img class="bottle-photo bottle-photo-fallback" src="{rel(fallback, base)}" alt="{esc(p["naam"])}" loading="lazy" width="{w}" height="{h}">'
+                f'<span class="photo-label">Geen productfoto gevonden</span>')
     return bottle_svg(p.get("familie_hoofd", "Fris"), p.get("id", ""), w=w, h=h)
 
 print(f"Dataset geladen: {len(PERFUMES)} parfums")
@@ -314,7 +326,7 @@ def perfume_card_html(p, base, rank=None, badge=None):
     badge_html = f'<div class="badge">{esc(badge)}</div>' if badge else ""
     return f'''<article class="perfume-card">
   {rank_html}{badge_html}
-  <div class="bottle">{bottle_visual_html(p)}</div>
+  <div class="bottle">{bottle_visual_html(p, base=base)}</div>
   <h3>{esc(p["naam"])}</h3>
   <div class="meta">{esc(p["merk"])} &middot; {esc(p["concentratie"])}</div>
   <p>{esc(p["beschrijving"][:70])}{"…" if len(p["beschrijving"])>70 else ""}</p>
@@ -329,7 +341,7 @@ def wizard_shell_html(inner_html):
 
 def wizard_data_scripts(base):
     data_json = json.dumps(PERFUMES, ensure_ascii=False)
-    cfg_json = json.dumps({"parfumBase": base + "parfums/"})
+    cfg_json = json.dumps({"parfumBase": base + "parfums/", "assetBase": base + "assets/img/"})
     return f'''<script>window.PARFUM_DATA = {data_json};window.WIZARD_CONFIG = {cfg_json};</script>
 <script src="{rel("/assets/js/wizard.js", base)}?v={ASSET_VERSION}" defer></script>'''
 
@@ -591,7 +603,7 @@ def build_perfume_page(p):
         match = _find_similar_link(naam)
         if match and match["id"] != p["id"]:
             similar_html += f'<a class="perfume-card" style="display:block;text-decoration:none" href="{rel("/parfums/"+match["id"]+"/", base)}">' \
-                             f'<div class="bottle">{bottle_visual_html(match)}</div>' \
+                             f'<div class="bottle">{bottle_visual_html(match, base=base)}</div>' \
                              f'<h3 style="font-size:15px">{esc(match["naam"])}</h3><div class="meta">{esc(match["merk"])}</div></a>'
         else:
             similar_html += f'<div class="perfume-card"><div class="bottle">{bottle_svg(p.get("familie_hoofd","Fris"), p.get("id","")+naam)}</div>' \
@@ -610,7 +622,7 @@ def build_perfume_page(p):
 
     content = f'''
 <section class="container pd-hero">
-  <div class="pd-bottle reveal">{bottle_visual_html(p, w=220, h=280)}</div>
+  <div class="pd-bottle reveal">{bottle_visual_html(p, w=220, h=280, base=base)}</div>
   <div>
     <div class="eyebrow">{esc(p["merk"])}</div>
     <h1 style="font-size:clamp(28px,4vw,40px)">{esc(p["naam"])}</h1>
