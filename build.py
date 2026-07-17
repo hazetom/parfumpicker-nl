@@ -9,7 +9,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 DIST = os.path.join(ROOT, "dist")
 DATA_FILE = os.path.join(ROOT, "data", "parfums.jsonl")
 SITE_URL = "https://parfumpicker.nl"
-ASSET_VERSION = "2026-07-13-9"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
+ASSET_VERSION = "2026-07-13-10"  # ophogen bij elke CSS/JS-wijziging om browsercaches te forceren te verversen
 
 # Echte stockfoto's: uitsluitend voor marketing/sfeercontent (hero, cadeau-inspiratie,
 # over-ons) waar geen claim wordt gemaakt dat dit een specifiek product is.
@@ -345,7 +345,8 @@ def hero_card_html(total):
     the wizard host is a single finite CSS @keyframes animation (never an
     ongoing transition) for the same reason. The 3-step list auto-cycles
     until expansion."""
-    return f'''<div class="proof-row" id="proofRow">
+    return f'''<div class="wizard-slot" id="wizardSlot">
+  <div class="proof-row" id="proofRow">
   <div class="card" id="engineCard" tabindex="0" role="button" aria-label="Start de ParfumPicker wizard">
     <div class="card-text">
       <div class="card-eyebrow"><span class="dot"></span>ParfumPicker Tool</div>
@@ -360,8 +361,9 @@ def hero_card_html(total):
     <div class="step-line" data-step="2"><span class="num mono">02</span><span class="txt">Wij wegen top-, hart- en basisnoten</span></div>
     <div class="step-line" data-step="3"><span class="num mono">03</span><span class="txt">Ontvang je persoonlijke top 3</span></div>
   </div>
+  </div>
+  <div class="wizard-host" id="wizardHost"><div id="wizardApp"></div></div>
 </div>
-<div class="wizard-host" id="wizardHost"><div id="wizardApp"></div></div>
 <script>
 (function(){{
   var proofRow = document.getElementById('proofRow');
