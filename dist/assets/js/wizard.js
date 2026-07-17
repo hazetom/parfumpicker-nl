@@ -957,9 +957,6 @@
   }
 
   function heroCardHtml(p, rank, pct, isTop){
-    var shopHtml = p.affiliate_url ?
-      '<a class="shop-btn" href="' + p.affiliate_url + '" target="_blank" rel="noopener nofollow sponsored">Shop bij ICI Paris XL</a>' :
-      '<button type="button" class="shop-btn shop-btn-empty" disabled>Geen prijs gevonden</button>';
     return '<div class="hero-row' + (isTop ? ' rank-top' : '') + '">' +
       '<div class="hero-rank">' + (isTop ? "" : rank) + '</div>' +
       '<div class="hero-bottle-wrap">' +
@@ -972,7 +969,7 @@
       '<div class="hero-meta">' + p.merk + ' &middot; ' + p.concentratie + ' &middot; ' + p.prijsklasse + '</div>' +
       heroPillsHtml(p) +
       '<p class="hero-why">' + p.beschrijving + '</p>' +
-      '<div class="hero-actions">' + shopHtml + '<a class="details-mini" href="' + CFG.parfumBase + p.id + '/index.html">Bekijk details &rarr;</a></div>' +
+      '<div class="hero-actions">' + shopBtnHtml(p) + '<a class="details-mini" href="' + CFG.parfumBase + p.id + '/index.html" data-id="' + p.id + '">Bekijk details &rarr;</a></div>' +
       '</div>' +
       '</div>';
   }
@@ -1160,9 +1157,11 @@
     staggerGrid(document.querySelector("#heroList .hero-rows-wrap"));
 
     var grid = document.getElementById("resultsGrid");
-    if (grid) {
-      staggerGrid(grid);
-      grid.addEventListener("click", function(e){
+    if (grid) staggerGrid(grid);
+
+    var heroList = document.getElementById("heroList");
+    if (heroList) {
+      heroList.addEventListener("click", function(e){
         var btn = e.target.closest(".why-toggle");
         if (btn) {
           btn.classList.toggle("open");
@@ -1171,7 +1170,7 @@
           if (list) list.classList.toggle("open");
           return;
         }
-        var link = e.target.closest(".details-link");
+        var link = e.target.closest(".details-link, .details-mini");
         if (link) {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
           e.preventDefault();
