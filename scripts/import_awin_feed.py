@@ -48,7 +48,12 @@ EXCLUDE_KEYWORDS = [
 
 
 def norm(s):
-    return re.sub(r"\s+", " ", (s or "")).strip().lower()
+    # The feed uses U+00B4 (acute accent, "L´eau") for apostrophes rather than
+    # a straight quote or a typographic right-single-quote; our own data uses
+    # a straight quote. Canonicalize all apostrophe-like characters so names
+    # like "L'Eau" / "L’Eau" / "L´Eau" compare equal.
+    s = re.sub(r"[‘’´`]", "'", s or "")
+    return re.sub(r"\s+", " ", s).strip().lower()
 
 
 def load_our_perfumes():

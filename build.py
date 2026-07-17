@@ -562,11 +562,22 @@ def _tag_list(items):
     return "".join(f'<span class="tag">{esc(t)}</span>' for t in items)
 
 def _find_similar_link(name):
+    """Brand-blind substring match on 'naam' alone, so short names (e.g. 'CH')
+    can spuriously match inside an unrelated word (e.g. 'GivenCHy'). Guard
+    against that with a minimum length, and prefer the longest (most
+    specific) match instead of the first one in list order, so a precise
+    match like 'L'Interdit Eau de Parfum Intense' wins over a short
+    incidental one."""
     name_l = name.lower()
+    best, best_len = None, 0
     for p in PERFUMES:
-        if p["naam"].lower() in name_l or name_l in p["naam"].lower():
-            return p
-    return None
+        naam_l = p["naam"].lower()
+        if len(naam_l) < 4:
+            continue
+        if naam_l in name_l or name_l in naam_l:
+            if len(naam_l) > best_len:
+                best, best_len = p, len(naam_l)
+    return best
 
 def build_perfume_page(p):
     path = f'/parfums/{p["id"]}/'
