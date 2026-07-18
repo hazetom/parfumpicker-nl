@@ -577,7 +577,16 @@
       if (!q || !matches.length) { closeList(); showFeedback(); return; }
       list.innerHTML = matches.map(function(p){
         var label = p.naam.toLowerCase().indexOf(p.merk.toLowerCase()) === 0 ? p.naam : (p.merk + " " + p.naam);
-        return '<button type="button" class="autocomplete-item" data-id="' + p.id + '">' + label + '<span>' + p.merk + '</span></button>';
+        // Real photo when we have one; otherwise the existing SVG bottle illustration -
+        // never the labelled fallback-photo used elsewhere, since "Geen productfoto
+        // gevonden" is illegible at this size and would misrepresent as a real caption.
+        var thumb = p.afbeelding_url
+          ? '<img src="' + p.afbeelding_url + '" alt="" loading="lazy">'
+          : bottleSvg(p.familie_hoofd, p.id, 60, 76);
+        return '<button type="button" class="autocomplete-item" data-id="' + p.id + '">' +
+          '<span class="autocomplete-item-thumb">' + thumb + '</span>' +
+          '<span class="autocomplete-item-text"><span class="nm">' + label + '</span></span>' +
+          '<span>' + p.merk + '</span></button>';
       }).join("");
       list.classList.add("open");
       Array.prototype.forEach.call(list.querySelectorAll(".autocomplete-item"), function(btn){
