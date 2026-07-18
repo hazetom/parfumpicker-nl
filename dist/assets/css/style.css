@@ -135,8 +135,23 @@ p{margin:0 0 1em}
    the ~1s crossfade (the card isn't display:none'd until its fade
    finishes), so the page briefly grew to card-height + wizard-height and
    then snapped back down once the card was removed - a visible jump. */
-.wizard-slot{display:grid;margin-bottom:88px}
+.wizard-slot{display:grid;min-width:0}
 .wizard-slot>.proof-row,.wizard-slot>.wizard-host{grid-area:1/1}
+
+/* hero-wizard-row: puts the wizard left-aligned (see #wizard .wizard-panel
+   below) with a sticky ad rail claiming the freed-up right-hand space.
+   The rail only fits once the container is at its full 1180px width with
+   room to spare, so it's desktop-only; nothing here changes the wizard's
+   own size, only where the leftover space goes. */
+.hero-wizard-row{display:flex;align-items:flex-start;gap:40px;margin-bottom:88px}
+.hero-wizard-row .wizard-slot{flex:1}
+#wizard .wizard-panel{margin-left:0;margin-right:auto}
+.ad-unit-skyscraper{display:none;flex:none;width:160px;height:600px;position:sticky;top:32px}
+/* Only once expanded: the compact entry card (.card, fixed 700px + steps-col)
+   is sized for the full-width row and doesn't shrink, so showing the rail
+   earlier would overlap it. The wizard-panel that replaces it is flexible
+   (max-width:900px, no fixed width) and fits the narrower space fine. */
+@media(min-width:1440px){.hero-wizard-row:has(.wizard-host.show) .ad-unit-skyscraper{display:flex}}
 
 .proof-row{display:flex;gap:24px;align-items:stretch;position:relative;z-index:2;transition:opacity 1.05s cubic-bezier(.22,.61,.36,1),transform 1.05s cubic-bezier(.22,.61,.36,1)}
 .proof-row.leaving{opacity:0;transform:scale(.985);pointer-events:none}
@@ -187,7 +202,7 @@ p{margin:0 0 1em}
 .step-line .txt{font-size:22px;font-weight:500;color:var(--border);letter-spacing:-.01em;transition:color .3s ease}
 .step-line.on .txt{color:var(--text);font-weight:600}
 .step-line.on .num{color:var(--accent)}
-@media(max-width:900px){.proof-row{flex-direction:column}.engine-card{width:100%}.steps-col{padding-left:0}}
+@media(max-width:900px){.proof-row{flex-direction:column}#engineCard{width:100%}.steps-col{padding-left:0}}
 @media(prefers-reduced-motion:reduce){.step-line .txt,.steps-col{transition:none}}
 
 /* Trust row */
