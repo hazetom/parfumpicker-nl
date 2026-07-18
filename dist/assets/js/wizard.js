@@ -36,6 +36,7 @@
     moment: [],
     seizoen: [],
     budget: null,
+    bekendheid: { uniek: false, bekend: false },
     step: 0,
     shown: []
   };
@@ -651,7 +652,9 @@
       '<p class="wizard-hint">Optioneel, voor extra verfijning. Mag meerdere per groep.</p>' +
       '<div class="option-pill-grid" id="optsMoment"></div>' +
       '<p class="wizard-subhead">In welk seizoen?</p>' +
-      '<div class="option-pill-grid" id="optsSeizoen"></div>'
+      '<div class="option-pill-grid" id="optsSeizoen"></div>' +
+      '<p class="wizard-microlabel">Nog een voorkeur? (optioneel)</p>' +
+      '<div class="bk-switch-row" id="optsBekendheid"></div>'
     );
     var optsMoment = document.getElementById("optsMoment");
     MOMENT_OPTIONS.forEach(function(o){
@@ -677,7 +680,27 @@
       optsSeizoen.appendChild(card);
     });
     staggerGrid(optsSeizoen);
-    navForward(true, "Bekijk mijn advies", function(){ runMatchScan(showResults); }, function(){ state.moment=[]; state.seizoen=[]; runMatchScan(showResults); });
+    var optsBekendheid = document.getElementById("optsBekendheid");
+    var bkItemUniek, bkItemBekend;
+    function bkSwitchItem(label, key, other){
+      var item = document.createElement("div");
+      item.className = "bk-switch-item";
+      item.innerHTML = '<span class="bk-switch' + (state.bekendheid[key] ? " on" : "") + '"><i></i></span><span class="lbl">' + label + '</span>';
+      item.onclick = function(){
+        state.bekendheid[key] = !state.bekendheid[key];
+        item.querySelector(".bk-switch").classList.toggle("on", state.bekendheid[key]);
+        if (state.bekendheid[key] && state.bekendheid[other]) {
+          state.bekendheid[other] = false;
+          (key === "uniek" ? bkItemBekend : bkItemUniek).querySelector(".bk-switch").classList.remove("on");
+        }
+      };
+      return item;
+    }
+    bkItemUniek = bkSwitchItem("Liever iets unieks, niet de bekendste keuze", "uniek", "bekend");
+    bkItemBekend = bkSwitchItem("Liever een bekende, veilige keuze", "bekend", "uniek");
+    optsBekendheid.appendChild(bkItemUniek);
+    optsBekendheid.appendChild(bkItemBekend);
+    navForward(true, "Bekijk mijn advies", function(){ runMatchScan(showResults); }, function(){ state.moment=[]; state.seizoen=[]; state.bekendheid={uniek:false,bekend:false}; runMatchScan(showResults); });
   }
 
   function sillageBucket(){
@@ -1217,6 +1240,7 @@
     state.moment = [];
     state.seizoen = [];
     state.budget = null;
+    state.bekendheid = { uniek: false, bekend: false };
     state.step = 0;
     state.shown = [];
     lastShownCount = null;

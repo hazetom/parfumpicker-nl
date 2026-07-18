@@ -294,6 +294,19 @@ p{margin:0 0 1em}
 .wizard-question{font-family:var(--font-display);font-weight:700;font-size:26px;letter-spacing:-.01em;display:block;margin-bottom:6px}
 .wizard-hint{color:var(--text-muted);font-size:14.5px;margin-bottom:20px}
 .wizard-subhead{font-family:var(--font-display);font-weight:700;font-size:15px;margin:22px 0 12px}
+.wizard-microlabel{color:var(--text-muted);font-size:12.5px;font-weight:600;margin:24px 0 10px}
+
+/* Bekendheid-voorkeur: 2 losse schakelaars, bewust rustiger dan de option-pills
+   erboven zodat dit als een lichte extra verfijning leest, niet als een nieuwe
+   verplichte vraag. Nog niet gekoppeld aan de matching-score (data volgt later). */
+.bk-switch-row{display:flex;flex-direction:column;gap:12px}
+.bk-switch-item{display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none}
+.bk-switch{width:32px;height:19px;border-radius:999px;background:var(--border);position:relative;flex:none;transition:background .15s ease}
+.bk-switch i{position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.22);transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.bk-switch.on{background:var(--accent)}
+.bk-switch.on i{transform:translateX(13px)}
+.bk-switch-item .lbl{font-size:13.5px;color:var(--text-muted)}
+@media(prefers-reduced-motion:reduce){.bk-switch,.bk-switch i{transition:none}}
 
 .option-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 @media(max-width:520px){.option-grid .option-card:last-child:nth-child(odd){grid-column:1/-1}}
